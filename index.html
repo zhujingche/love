@@ -1144,22 +1144,26 @@ const BGM_SOURCES = [
   'bgm.wav'
 ];
 let bgmSrcIdx = 0, bgmWanted = LS.get('jxy_bgm', 'on') === 'on', bgmStarted = false;
+let bgmGotData = false;                      // CDN 只要开始下载就不要换源（否则会切到更慢的源）
 bgm.src = BGM_SOURCES[0];
 
 function nextBgmSource() {
   if (bgmSrcIdx >= BGM_SOURCES.length - 1) return false;
   bgmSrcIdx++;
   const wasPlaying = !bgm.paused;
+  bgmGotData = false;
   bgm.src = BGM_SOURCES[bgmSrcIdx];
   bgm.load();
   if (wasPlaying && bgmWanted) { bgmStarted = false; startBgm(); }
   return true;
 }
-/* 7 秒内没读到元数据（说明这个源太慢或不通）→ 换源 */
+bgm.addEventListener('progress', () => { bgmGotData = true; });
+bgm.addEventListener('loadedmetadata', () => { bgmGotData = true; });
+/* 只有「完全没有数据」持续约 21 秒才换下一个源 */
 setInterval(() => {
-  if (!bgmStarted && bgmWanted && !(bgm.duration > 0)) {
+  if (!bgmStarted && bgmWanted && !bgmGotData && !(bgm.duration > 0)) {
     if (bgm._slowTicks === undefined) bgm._slowTicks = 0;
-    if (++bgm._slowTicks >= 3) { bgm._slowTicks = 0; nextBgmSource(); }
+    if (++bgm._slowTicks >= 6) { bgm._slowTicks = 0; nextBgmSource(); }
   }
 }, 3500);
 bgm.addEventListener('error', () => { nextBgmSource(); });
