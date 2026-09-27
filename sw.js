@@ -1,5 +1,5 @@
 // 最简单的离线缓存：第一次打开后，没网也能看（改了内容把 VERSION 改一下即可刷新）
-const VERSION = 'v1';
+const VERSION = 'v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
