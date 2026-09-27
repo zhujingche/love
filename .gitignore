@@ -1,0 +1,6 @@
+# 本地生成的截图、缓存等，不进仓库
+shots/
+__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store
