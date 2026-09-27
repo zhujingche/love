@@ -245,6 +245,21 @@
   .tabbar button.on .e{filter:none;opacity:1;transform:scale(1.06)}
   .view{display:none}
   .view.on{display:block}
+
+  /* ===== 背景音乐按钮 ===== */
+  .music-btn{
+    position:fixed; z-index:45; cursor:pointer;
+    right:calc(12px + env(safe-area-inset-right, 0px));
+    top:calc(10px + env(safe-area-inset-top, 0px));
+    width:44px; height:44px; border-radius:50%;
+    border:2px solid #ffd0e2; background:#fffffff2; color:var(--pink-deep);
+    font-size:19px; line-height:1; box-shadow:0 4px 14px rgba(255,140,180,.28);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .music-btn:active{transform:scale(.94)}
+  .music-btn.playing{animation:mpulse 2.4s ease-in-out infinite; background:linear-gradient(135deg,#fff0f7,#ffd7e9)}
+  @keyframes mpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,120,170,.5)}50%{box-shadow:0 0 0 9px rgba(255,120,170,0)}}
+  .music-btn.off{opacity:.5; filter:grayscale(1)}
 </style>
 </head>
 <body>
@@ -390,6 +405,13 @@
     </div>
   </section>
 </div>
+
+<!-- 背景音乐：优先播放自制的 bgm.mp3；没有 mp3 时播放占位 bgm.wav -->
+<audio id="bgm" loop preload="none" playsinline>
+  <source src="bgm.mp3" type="audio/mpeg">
+  <source src="bgm.wav" type="audio/wav">
+</audio>
+<button id="musicBtn" class="music-btn" title="背景音乐">🎵</button>
 
 <!-- ================= 底部导航 ================= -->
 <nav class="tabbar">
@@ -1113,6 +1135,65 @@ setInterval(renderQuote, 60000);
     }
   }
 })();
+
+/* ============================================================
+   背景音乐（浏览器规定必须由用户点一下才能出声）
+   ============================================================ */
+const bgm = $('bgm'), musicBtn = $('musicBtn');
+let bgmWanted = LS.get('jxy_bgm', 'on') === 'on';
+let bgmStarted = false;
+
+function paintMusic() {
+  const playing = !bgm.paused;                 // 只要没暂停就算在播
+  musicBtn.textContent = playing ? '🎵' : '🔇';
+  musicBtn.classList.toggle('playing', playing);
+  musicBtn.classList.toggle('off', !bgmWanted && !playing);
+}
+function fadeIn() {
+  let v = 0;
+  bgm.volume = 0;
+  clearInterval(bgm._fade);
+  bgm._fade = setInterval(() => {
+    v = Math.min(0.45, v + 0.03);
+    bgm.volume = v;
+    if (v >= 0.45) clearInterval(bgm._fade);
+  }, 60);
+}
+function startBgm() {
+  if (!bgmWanted || bgmStarted) return;
+  const p = bgm.play();
+  if (p && p.then) {
+    p.then(() => { bgmStarted = true; fadeIn(); paintMusic(); })
+      .catch(() => {
+        if (bgm.networkState === 3 || bgm.error) { musicBtn.style.display = 'none'; }  // 没有音频文件
+        paintMusic();
+      });
+  }
+}
+musicBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (bgm.paused) {                     // 点一下 → 播放
+    bgmWanted = true;
+    LS.set('jxy_bgm', 'on');
+    bgmStarted = false;
+    startBgm();
+  } else {                              // 再点一下 → 暂停
+    bgmWanted = false;
+    LS.set('jxy_bgm', 'off');
+    bgm.pause();
+    bgmStarted = false;
+  }
+  paintMusic();
+  beep(bgmWanted ? 660 : 440, 0.08);
+});
+bgm.addEventListener('play', paintMusic);
+bgm.addEventListener('playing', paintMusic);
+bgm.addEventListener('pause', paintMusic);
+/* 首次任意点击/触摸 → 尝试播放；未成功则下次点击再试 */
+window.addEventListener('pointerdown', () => startBgm(), { passive: true });
+window.addEventListener('touchstart', () => startBgm(), { passive: true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && bgmWanted) startBgm(); });
+paintMusic();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
