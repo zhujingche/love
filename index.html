@@ -199,9 +199,11 @@ const START = new Date(2026, 7, 30);   // 月份从 0 开始：7 = 8 月
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /* ============================================================
-   推送配置：把 token 填在这里（或手机打开 ?setup=1 手动设置）
-   type: 'pushplus'（推荐） | 'serverchan'
+   推送：ntfy（免注册、免实名，手机装 App 即可收推送）
+   她点“发给他” → 你手机立刻收到全文
+   备用通道：填了 token 就走 PushPlus / Server酱
    ============================================================ */
+const NTFY_TOPIC = 'jxy-love-2c2d8f7e9f5d';
 const PUSH = { type: 'pushplus', token: '' };
 
 const $ = (id) => document.getElementById(id);
@@ -310,10 +312,19 @@ function getType() {
   try { return localStorage.getItem('jxy_push_type') || PUSH.type; } catch (e) { return PUSH.type; }
 }
 
-/* 通过隐藏表单跨域提交（不受浏览器 CORS 限制，保证送达） */
-function pushToHim(title, text) {
+/* 发送：优先 ntfy(浏览器直发)；备用 token 通道用隐藏表单跨域提交 */
+async function pushToHim(title, text) {
+  try {
+    const r = await fetch('https://ntfy.sh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic: NTFY_TOPIC, title: title, message: text, tags: ['heart'] })
+    });
+    if (r.ok) return 'ntfy';
+  } catch (e) { /* 网络异常则走备用通道 */ }
+
   const token = getToken();
-  if (!token) return false;
+  if (!token) return '';
   const type = getType();
   const form = document.createElement('form');
   form.method = 'POST';
@@ -336,7 +347,7 @@ function pushToHim(title, text) {
   document.body.appendChild(form);
   form.submit();
   setTimeout(() => form.remove(), 1000);
-  return true;
+  return 'form';
 }
 
 /* 组三段文字 */
@@ -350,14 +361,17 @@ function buildText() {
 }
 
 /* 发送按钮 */
-$('sendBtn').addEventListener('click', function () {
+$('sendBtn').addEventListener('click', async function () {
   const hasAny = NOTES.some((n) => $(n.id).value.trim());
   if (!hasAny) { $('sendTip').textContent = '还没写内容呢～'; return; }
 
+  this.disabled = true;
+  $('sendTip').textContent = '正在发送…';
   const text = buildText();
-  const ok = pushToHim('江鑫颖 写了新内容', text);
+  const channel = await pushToHim('江鑫颖 写了新内容', text);
+  this.disabled = false;
 
-  if (!ok) {                                  // 没配置 token：退回复制方式
+  if (!channel) {                             // 两条通道都不可用：退回复制方式
     const tmp = document.createElement('textarea');
     tmp.value = text; tmp.style.position = 'fixed'; tmp.style.opacity = '0';
     document.body.appendChild(tmp); tmp.select();
@@ -374,7 +388,7 @@ $('sendBtn').addEventListener('click', function () {
   const stamp = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
     + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
   try { localStorage.setItem(SENT_KEY, stamp); } catch (e) { }
-  $('sendTip').textContent = '已发送 ✅ 他微信马上就能收到（' + stamp + '）';
+  $('sendTip').textContent = '已发送 ✅ 他手机马上就能收到（' + stamp + '）';
   this.textContent = '已发送 ✅';
   setTimeout(() => { this.textContent = '写完啦，发给他'; }, 2000);
 });
