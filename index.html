@@ -112,10 +112,10 @@
   .pet-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 8px rgba(200,120,160,.25))}
   /* 换装图层(emoji 浮层)：位置按兔子身体比例调过 */
   .lay{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;line-height:1}
-  .lay.hat{top:8px;font-size:38px}
-  .lay.glasses{top:58px;font-size:32px}
-  .lay.clothes{top:92px;font-size:50px}
-  .lay.deco{top:64px;font-size:32px;left:auto;right:-4px;transform:none}
+  .lay.hat{top:30px;font-size:34px}
+  .lay.glasses{top:78px;font-size:31px}
+  .lay.clothes{top:124px;font-size:44px}
+  .lay.deco{top:106px;font-size:30px;left:auto;right:-4px;transform:none}
   #petSvg{width:100%;height:100%}
   #petSvg svg{width:100%;height:100%;display:block}
   .poops{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:10px;font-size:24px}
@@ -301,7 +301,7 @@
         <div class="col"><button class="btn small ghost" id="playBtn">🎮 玩游戏</button></div>
         <div class="col"><button class="btn small ghost" id="cleanBtn">🧹 铲屎</button></div>
       </div>
-      <div class="muted" id="petTip">喂食 +2💗 · 铲屎 +2💗/坨 · 猜拳赢 +3💗</div>
+      <div class="muted" id="petTip">喂食 +2💗 · 铲屎 +2💗/坨 · 猜拳赢了不加爱心（只让憨豆开心）</div>
     </div>
 
     <div class="card">
@@ -324,7 +324,7 @@
 <div class="modal" id="rpsModal">
   <div class="modal-card">
     <h3>和憨豆猜拳</h3>
-    <p>赢一局 +3 💗（憨豆很菜的）</p>
+    <p>赢了憨豆会超开心（不给爱心啦，爱心要靠照顾它赚）</p>
     <div class="rps">
       <button data-rps="石头">✊</button>
       <button data-rps="剪刀">✌️</button>
@@ -667,36 +667,49 @@ function tickPet() {
 }
 function savePet() { LS.set('jxy_pet', pet); }
 
-/* 兔子本体（原创绘制：圆身长耳黄兔，含表情变化） */
+/* 兔子本体（原创绘制：奶黄圆头长耳兔；按参考图的画风——粗描边、大眼高光、腮红斜线） */
 function petSvg(mood) {
-  const ink = '#d9a441', fill = '#ffe066', face = '#ffec99';
-  const eye = (x) => mood === 'happy'
-    ? '<path d="M' + (x - 7) + ' 85 q7 -8 14 0" stroke="#3b2f1f" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
+  const ink = '#4a3527', cream = '#fff7d6', inner = '#ffc2d6';
+
+  const ears = ''
+    + '<rect x="61" y="4" width="17" height="62" rx="8.5" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.6"/>'
+    + '<rect x="66" y="13" width="7" height="44" rx="3.5" fill="' + inner + '"/>'
+    + '<rect x="92" y="4" width="17" height="62" rx="8.5" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.6"/>'
+    + '<rect x="97" y="13" width="7" height="44" rx="3.5" fill="' + inner + '"/>';
+
+  const eyes = mood === 'happy'
+    ? '<path d="M58 96 q9 -11 18 0" stroke="' + ink + '" stroke-width="4" fill="none" stroke-linecap="round"/>'
+      + '<path d="M94 96 q9 -11 18 0" stroke="' + ink + '" stroke-width="4" fill="none" stroke-linecap="round"/>'
     : mood === 'hungry'
-      ? '<path d="M' + (x - 6) + ' 79 l12 12 M' + (x + 6) + ' 79 l-12 12" stroke="#3b2f1f" stroke-width="3.2" fill="none" stroke-linecap="round"/>'
-      : '<circle cx="' + x + '" cy="85" r="4.9" fill="#3b2f1f"/><circle cx="' + (x - 1.7) + '" cy="83.3" r="1.6" fill="#fff"/>';
+      ? '<path d="M60 90 l16 16 M76 90 l-16 16" stroke="' + ink + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>'
+        + '<path d="M94 90 l16 16 M110 90 l-16 16" stroke="' + ink + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>'
+      : '<ellipse cx="68" cy="95" rx="7.6" ry="9.4" fill="' + ink + '"/>'
+        + '<circle cx="65.4" cy="90.6" r="2.8" fill="#fff"/>'
+        + '<ellipse cx="102" cy="95" rx="7.6" ry="9.4" fill="' + ink + '"/>'
+        + '<circle cx="99.4" cy="90.6" r="2.8" fill="#fff"/>';
+
   const mouth = mood === 'happy'
-    ? '<ellipse cx="85" cy="99" rx="7.5" ry="6" fill="#f07a9b"/><path d="M79 96.5 q6 4 12 0" stroke="#c65b78" stroke-width="1.6" fill="none"/>'
-    : '<path d="M78 96 q7 7 14 0" stroke="#a9784a" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+    ? '<ellipse cx="85" cy="113" rx="8" ry="6.5" fill="#f07a9b" stroke="' + ink + '" stroke-width="2.6"/>'
+    : '<ellipse cx="85" cy="107" rx="2.8" ry="2.2" fill="' + ink + '"/>'
+      + '<path d="M78 111 q4 6 7 0" stroke="' + ink + '" stroke-width="2.8" fill="none" stroke-linecap="round"/>'
+      + '<path d="M85 111 q4 6 7 0" stroke="' + ink + '" stroke-width="2.8" fill="none" stroke-linecap="round"/>';
+
+  const blush = (x) => '<ellipse cx="' + x + '" cy="108" rx="9.5" ry="6.2" fill="#ffb3c9"/>'
+    + '<path d="M' + (x - 4) + ' 105 l0 6 M' + x + ' 105 l0 6 M' + (x + 4) + ' 105 l0 6" stroke="#f07a9b" stroke-width="1.6" stroke-linecap="round"/>';
+
   return '<svg viewBox="0 0 170 170" aria-hidden="true">'
-    // 耳朵
-    + '<ellipse cx="63" cy="36" rx="11.5" ry="31" fill="' + fill + '" stroke="' + ink + '" stroke-width="3" transform="rotate(-9 63 36)"/>'
-    + '<ellipse cx="63" cy="38" rx="5.2" ry="21" fill="#ffc2d6" transform="rotate(-9 63 38)"/>'
-    + '<ellipse cx="107" cy="36" rx="11.5" ry="31" fill="' + fill + '" stroke="' + ink + '" stroke-width="3" transform="rotate(9 107 36)"/>'
-    + '<ellipse cx="107" cy="38" rx="5.2" ry="21" fill="#ffc2d6" transform="rotate(9 107 38)"/>'
-    // 身体 / 肚皮 / 脚 / 手 / 尾巴
-    + '<ellipse cx="85" cy="126" rx="40" ry="33" fill="' + fill + '" stroke="' + ink + '" stroke-width="3"/>'
-    + '<ellipse cx="85" cy="132" rx="27" ry="21" fill="#fff3bf"/>'
-    + '<ellipse cx="62" cy="152" rx="13" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
-    + '<ellipse cx="108" cy="152" rx="13" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
-    + '<ellipse cx="42" cy="120" rx="10" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
-    + '<ellipse cx="128" cy="120" rx="10" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
-    + '<circle cx="127" cy="141" r="8" fill="#fffdf5" stroke="' + ink + '" stroke-width="2.4"/>'
-    // 头 / 腮红 / 眼睛 / 嘴
-    + '<ellipse cx="85" cy="86" rx="43" ry="37" fill="' + face + '" stroke="' + ink + '" stroke-width="3"/>'
-    + '<ellipse cx="60" cy="100" rx="8.5" ry="5.4" fill="#ffb3c9" opacity=".9"/>'
-    + '<ellipse cx="110" cy="100" rx="8.5" ry="5.4" fill="#ffb3c9" opacity=".9"/>'
-    + eye(70) + eye(100) + mouth
+    + ears
+    // 身体 / 小手 / 脚 / 尾巴
+    + '<ellipse cx="85" cy="150" rx="27" ry="20" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.6"/>'
+    + '<path d="M52 138 q-13 -7 -16 1 q6 8 16 6 Z" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.2"/>'
+    + '<path d="M118 138 q13 -7 16 1 q-6 8 -16 6 Z" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.2"/>'
+    + '<ellipse cx="70" cy="164" rx="9" ry="5.4" fill="' + cream + '" stroke="' + ink + '" stroke-width="3"/>'
+    + '<ellipse cx="100" cy="164" rx="9" ry="5.4" fill="' + cream + '" stroke="' + ink + '" stroke-width="3"/>'
+    + '<circle cx="114" cy="158" r="6.4" fill="#fffdf5" stroke="' + ink + '" stroke-width="2.8"/>'
+    // 头（大圆头）
+    + '<ellipse cx="85" cy="94" rx="53" ry="47" fill="' + cream + '" stroke="' + ink + '" stroke-width="3.8"/>'
+    + blush(54) + blush(116)
+    + eyes + mouth
     + '</svg>';
 }
 
@@ -706,9 +719,9 @@ function renderPet() {
   $('hungerBar').style.width = pet.hunger + '%';
   $('happyBar').style.width = pet.happy + '%';
 
-  // 表情：饿了 → 饿肚子脸；心情好 → 笑眼；否则普通豆豆眼
+  // 表情：饿了 → 饿肚子脸；心情好 → 笑眼；否则普通大眼
   const moodKey = pet.hunger < 30 ? 'hungry' : (pet.happy > 75 ? 'happy' : 'normal');
-  $('petSvg').innerHTML = petSvg(moodKey);
+  if (!window.__userPet) $('petSvg').innerHTML = petSvg(moodKey);   // 若放了 pet.png 则优先显示自定义形象
 
   $('layHat').textContent = (SHOP.find((s) => s.id === pet.hat) || {}).e || '';
   $('layGlasses').textContent = (SHOP.find((s) => s.id === pet.glasses) || {}).e || '';
@@ -795,12 +808,12 @@ document.querySelectorAll('.rps button').forEach((b) => {
     const me = b.dataset.rps;
     const all = ['石头', '剪刀', '布'];
     const petPick = all[Math.floor(Math.random() * 3)];
-    const win = (me === '石头' && petPick === '剪刀') || (me === '剪刀' && petPick === '布') || (me === '布' && petPick === '石头');
+    win = (me === '石头' && petPick === '剪刀') || (me === '剪刀' && petPick === '布') || (me === '布' && petPick === '石头');
     const draw = me === petPick;
     pet.plays++;
-    if (win) { addHearts(3, '猜拳赢啦'); pet.happy = clamp(pet.happy + 6, 0, 100); }
+    if (win) { pet.happy = clamp(pet.happy + 10, 0, 100); }      // 赢了只加心情，不给爱心
     else if (!draw) { pet.happy = clamp(pet.happy + 2, 0, 100); }
-    $('rpsRes').textContent = '你出' + me + '，憨豆出' + petPick + ' → ' + (win ? '你赢啦！💗 +3' : draw ? '平局～再来' : '憨豆赢了（憨豆偷偷开心）');
+    $('rpsRes').textContent = '你出' + me + '，憨豆出' + petPick + ' → ' + (win ? '你赢啦！憨豆开心得转圈 🎉' : draw ? '平局～再来' : '憨豆赢了（憨豆偷偷开心）');
     savePet(); renderPet();
   });
 });
@@ -814,6 +827,17 @@ setInterval(() => { if (document.getElementById('view-pet').classList.contains('
 setHearts(hearts);
 renderDays(); renderQuote(); renderCheckin(); renderAnger();
 petSay(randomPetLine()); renderPet();
+
+/* 若目录里放了 pet.png，就用它作为宠物形象（你自己提供的图片） */
+(function probeUserPet() {
+  const im = new Image();
+  im.onload = () => {
+    window.__userPet = true;
+    $('petSvg').innerHTML = '<img src="pet.png" alt="pet" style="width:100%;height:100%;object-fit:contain">';
+  };
+  im.src = 'pet.png';
+})();
+
 tickPet();
 setInterval(renderDays, 1000);
 setInterval(tickPet, 60000);
