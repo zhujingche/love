@@ -57,6 +57,13 @@
   .card{background:var(--card);border-radius:18px;padding:14px 16px;box-shadow:0 6px 16px rgba(255,140,180,.15);margin-bottom:12px}
   .card .k{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
   .quote{font-size:15px;font-weight:600;line-height:1.8}
+  /* 常驻情话卡片 */
+  .card.pinned{background:linear-gradient(135deg,#fff3f9,#ffe4f0);border:2px solid #ffd0e2}
+  .pinned-text{
+    font-size:20px; font-weight:800; color:var(--pink-deep); text-align:center;
+    letter-spacing:.5px; line-height:1.7; padding:6px 0 2px;
+    text-shadow:0 1px 0 #fff;
+  }
   .row{display:flex;gap:10px;align-items:center}
   .row .col{flex:1; min-width:0}
   .btn{min-width:0}
@@ -278,6 +285,12 @@
   <section class="view" id="view-love">
     <div class="top-title">情话</div>
 
+    <!-- 常驻情话（永远显示，不参与随机） -->
+    <div class="card pinned">
+      <div class="k"><span>一直想对你说</span><span class="hearts">💗</span></div>
+      <div class="pinned-text">I LOVE YOU 3000 TIME.</div>
+    </div>
+
     <div class="card">
       <div class="k"><span>今天的情话</span><span class="hearts">💗</span></div>
       <div class="quote" id="quote2">—</div>
@@ -440,9 +453,9 @@ function renderDays() {
   document.title = '在一起第 ' + daysTogether(now) + ' 天';
 }
 
-/* ---------- 情话（随机推送） ---------- */
+/* ---------- 情话（第一句常驻，其余随机推送） ---------- */
+const PINNED_QUOTE = 'I LOVE YOU 3000 TIME.';     // 常驻：永远显示，不参与随机
 const QUOTES = [
-  'I LOVE YOU 3000 TIME.',
   '姐姐我今天也很想你!',
   '真的会因为姐姐的出现而感到很幸福',
   '我远比想象中更需要你',
