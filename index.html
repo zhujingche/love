@@ -1189,6 +1189,14 @@ musicBtn.addEventListener('click', (e) => {
 bgm.addEventListener('play', paintMusic);
 bgm.addEventListener('playing', paintMusic);
 bgm.addEventListener('pause', paintMusic);
+/* 双保险：即使浏览器没有遵守 loop，播完也立刻从头再来 */
+bgm.addEventListener('ended', () => {
+  if (!bgmWanted) return;
+  try { bgm.currentTime = 0; } catch (e) { }
+  bgm.play().catch(() => { });
+});
+/* 播到一半被系统暂停（切后台/锁屏）时，回到前台继续 */
+bgm.addEventListener('stalled', () => { if (bgmWanted) setTimeout(() => startBgm(), 1200); });
 /* 首次任意点击/触摸 → 尝试播放；未成功则下次点击再试 */
 window.addEventListener('pointerdown', () => startBgm(), { passive: true });
 window.addEventListener('touchstart', () => startBgm(), { passive: true });
