@@ -110,12 +110,14 @@
   .pet-wrap.happy{animation:jump .5s ease}
   @keyframes jump{0%,100%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(-16px)}}
   .pet-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 8px rgba(200,120,160,.25))}
-  /* 换装图层(emoji 浮层) */
+  /* 换装图层(emoji 浮层)：位置按兔子身体比例调过 */
   .lay{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;line-height:1}
-  .lay.hat{top:-4px;font-size:44px}
-  .lay.glasses{top:52px;font-size:34px}
-  .lay.clothes{top:96px;font-size:52px}
-  .lay.deco{top:60px;font-size:34px;left:auto;right:-6px;transform:none}
+  .lay.hat{top:8px;font-size:38px}
+  .lay.glasses{top:58px;font-size:32px}
+  .lay.clothes{top:92px;font-size:50px}
+  .lay.deco{top:64px;font-size:32px;left:auto;right:-4px;transform:none}
+  #petSvg{width:100%;height:100%}
+  #petSvg svg{width:100%;height:100%;display:block}
   .poops{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:10px;font-size:24px}
   .poop{animation:pop .4s ease both}
   @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
@@ -126,6 +128,7 @@
   }
   .bubble::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
     border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--line)}
+  @keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
   .bars{display:flex;gap:10px;margin-bottom:10px}
   .bar-box{flex:1;background:#fff;border-radius:14px;padding:9px 11px;border:1px solid var(--line)}
   .bar-box .n{font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;margin-bottom:5px}
@@ -266,27 +269,8 @@
       <div class="floor"></div>
       <div class="bubble" id="petSay">…</div>
       <div class="pet-wrap" id="petWrap">
-        <svg class="pet-svg" viewBox="0 0 170 170" aria-hidden="true">
-          <!-- 身体 -->
-          <ellipse cx="85" cy="118" rx="46" ry="40" fill="#fff5fa" stroke="#f0a7c4" stroke-width="3"/>
-          <ellipse cx="85" cy="124" rx="34" ry="28" fill="#ffe9f3"/>
-          <!-- 耳朵 -->
-          <path d="M50 88 L56 60 L76 80 Z" fill="#fff5fa" stroke="#f0a7c4" stroke-width="3"/>
-          <path d="M120 88 L114 60 L94 80 Z" fill="#fff5fa" stroke="#f0a7c4" stroke-width="3"/>
-          <!-- 脸 -->
-          <ellipse cx="85" cy="70" rx="38" ry="34" fill="#fffdfe" stroke="#f0a7c4" stroke-width="3"/>
-          <circle cx="70" cy="66" r="4.6" fill="#54404a"/>
-          <circle cx="100" cy="66" r="4.6" fill="#54404a"/>
-          <circle cx="68.4" cy="64.4" r="1.5" fill="#fff"/>
-          <circle cx="98.4" cy="64.4" r="1.5" fill="#fff"/>
-          <ellipse cx="85" cy="79" rx="4.4" ry="3.2" fill="#ff9ec4"/>
-          <path d="M78 84 q7 6 14 0" stroke="#b06a86" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <ellipse cx="60" cy="78" rx="6.5" ry="4.2" fill="#ffc9dd" opacity=".85"/>
-          <ellipse cx="110" cy="78" rx="6.5" ry="4.2" fill="#ffc9dd" opacity=".85"/>
-          <!-- 小手 -->
-          <ellipse cx="44" cy="120" rx="9" ry="7" fill="#fff5fa" stroke="#f0a7c4" stroke-width="2.5"/>
-          <ellipse cx="126" cy="120" rx="9" ry="7" fill="#fff5fa" stroke="#f0a7c4" stroke-width="2.5"/>
-        </svg>
+        <!-- 兔子本体由 JS 绘制（不同状态不同表情） -->
+        <div id="petSvg"></div>
         <!-- 换装浮层 -->
         <div class="lay hat" id="layHat"></div>
         <div class="lay glasses" id="layGlasses"></div>
@@ -633,6 +617,7 @@ const SHOP = [
   { id: 'hoodie', slot: 'clothes', e: '🧥', n: '外套', p: 18 },
   { id: 'cape', slot: 'clothes', e: '🦸', n: '小披风', p: 25 },
   { id: 'balloon', slot: 'deco', e: '🎈', n: '爱心气球', p: 10 },
+  { id: 'carrot', slot: 'deco', e: '🥕', n: '胡萝卜', p: 8 },
   { id: 'flower', slot: 'deco', e: '🌸', n: '小花', p: 12 },
   { id: 'wing', slot: 'deco', e: '🪽', n: '小翅膀', p: 22 }
 ];
@@ -658,7 +643,7 @@ function petSay(text) {
   b.textContent = text;
   b.style.animation = 'none';
   void b.offsetWidth;
-  b.style.animation = 'pop .3s ease both';
+  b.style.animation = 'fadein .3s ease both';   // 只动透明度+位移，避免覆盖居中位移
 }
 function randomPetLine() { return PET_LINES[Math.floor(Math.random() * PET_LINES.length)]; }
 
@@ -682,11 +667,48 @@ function tickPet() {
 }
 function savePet() { LS.set('jxy_pet', pet); }
 
+/* 兔子本体（原创绘制：圆身长耳黄兔，含表情变化） */
+function petSvg(mood) {
+  const ink = '#d9a441', fill = '#ffe066', face = '#ffec99';
+  const eye = (x) => mood === 'happy'
+    ? '<path d="M' + (x - 7) + ' 85 q7 -8 14 0" stroke="#3b2f1f" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
+    : mood === 'hungry'
+      ? '<path d="M' + (x - 6) + ' 79 l12 12 M' + (x + 6) + ' 79 l-12 12" stroke="#3b2f1f" stroke-width="3.2" fill="none" stroke-linecap="round"/>'
+      : '<circle cx="' + x + '" cy="85" r="4.9" fill="#3b2f1f"/><circle cx="' + (x - 1.7) + '" cy="83.3" r="1.6" fill="#fff"/>';
+  const mouth = mood === 'happy'
+    ? '<ellipse cx="85" cy="99" rx="7.5" ry="6" fill="#f07a9b"/><path d="M79 96.5 q6 4 12 0" stroke="#c65b78" stroke-width="1.6" fill="none"/>'
+    : '<path d="M78 96 q7 7 14 0" stroke="#a9784a" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+  return '<svg viewBox="0 0 170 170" aria-hidden="true">'
+    // 耳朵
+    + '<ellipse cx="63" cy="36" rx="11.5" ry="31" fill="' + fill + '" stroke="' + ink + '" stroke-width="3" transform="rotate(-9 63 36)"/>'
+    + '<ellipse cx="63" cy="38" rx="5.2" ry="21" fill="#ffc2d6" transform="rotate(-9 63 38)"/>'
+    + '<ellipse cx="107" cy="36" rx="11.5" ry="31" fill="' + fill + '" stroke="' + ink + '" stroke-width="3" transform="rotate(9 107 36)"/>'
+    + '<ellipse cx="107" cy="38" rx="5.2" ry="21" fill="#ffc2d6" transform="rotate(9 107 38)"/>'
+    // 身体 / 肚皮 / 脚 / 手 / 尾巴
+    + '<ellipse cx="85" cy="126" rx="40" ry="33" fill="' + fill + '" stroke="' + ink + '" stroke-width="3"/>'
+    + '<ellipse cx="85" cy="132" rx="27" ry="21" fill="#fff3bf"/>'
+    + '<ellipse cx="62" cy="152" rx="13" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
+    + '<ellipse cx="108" cy="152" rx="13" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
+    + '<ellipse cx="42" cy="120" rx="10" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
+    + '<ellipse cx="128" cy="120" rx="10" ry="8" fill="' + fill + '" stroke="' + ink + '" stroke-width="2.6"/>'
+    + '<circle cx="127" cy="141" r="8" fill="#fffdf5" stroke="' + ink + '" stroke-width="2.4"/>'
+    // 头 / 腮红 / 眼睛 / 嘴
+    + '<ellipse cx="85" cy="86" rx="43" ry="37" fill="' + face + '" stroke="' + ink + '" stroke-width="3"/>'
+    + '<ellipse cx="60" cy="100" rx="8.5" ry="5.4" fill="#ffb3c9" opacity=".9"/>'
+    + '<ellipse cx="110" cy="100" rx="8.5" ry="5.4" fill="#ffb3c9" opacity=".9"/>'
+    + eye(70) + eye(100) + mouth
+    + '</svg>';
+}
+
 function renderPet() {
   $('hungerN').textContent = Math.round(pet.hunger) + '%';
   $('happyN').textContent = Math.round(pet.happy) + '%';
   $('hungerBar').style.width = pet.hunger + '%';
   $('happyBar').style.width = pet.happy + '%';
+
+  // 表情：饿了 → 饿肚子脸；心情好 → 笑眼；否则普通豆豆眼
+  const moodKey = pet.hunger < 30 ? 'hungry' : (pet.happy > 75 ? 'happy' : 'normal');
+  $('petSvg').innerHTML = petSvg(moodKey);
 
   $('layHat').textContent = (SHOP.find((s) => s.id === pet.hat) || {}).e || '';
   $('layGlasses').textContent = (SHOP.find((s) => s.id === pet.glasses) || {}).e || '';
