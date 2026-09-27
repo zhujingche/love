@@ -440,40 +440,33 @@ function renderDays() {
   document.title = '在一起第 ' + daysTogether(now) + ' 天';
 }
 
-/* ---------- 情话（每天固定，可手动换） ---------- */
+/* ---------- 情话（随机推送） ---------- */
 const QUOTES = [
-  '你笑起来的时候，我这边天气就晴了。',
-  '想和你把普通的日子，一天一天过成纪念日。',
-  '今天也很喜欢你，比昨天多一点，比明天少一点。',
-  '你在我这儿，永远是优先级最高的事情。',
-  '不用很厉害，你只要开开心心做你自己就好。',
-  '遇见你之后，我才知道心动是会一直持续的事。',
-  '以后的路可能很长，但我想一直牵着你的手走。',
-  '你是我所有计划里，最确定的那一项。',
-  '想把好吃的第一口都留给你。',
-  '你困了我就安静一点，你开心我就跟着笑。',
-  '不用每天都开心，不开心的时候记得还有我。',
-  '你说过的每件小事，我都记着。',
-  '想抱你一下，就现在。',
-  '有你在，连排队都不算浪费时间。',
-  '你是我认真想过以后的那个人。'
+  'I LOVE YOU 3000 TIME.',
+  '姐姐我今天也很想你!',
+  '真的会因为姐姐的出现而感到很幸福',
+  '我远比想象中更需要你',
+  '或许我的爱还不够成熟，但你很重要，也很特别，我永远喜欢你',
+  'LOVE ME LONG',
+  '闭上眼睛不再是黑暗，而是你'
 ];
-let quoteOffset = LS.get('jxy_quote_off', 0);
-function quoteIndex() {
-  const n = new Date();
-  const seed = n.getFullYear() * 372 + (n.getMonth() + 1) * 31 + n.getDate();
-  return (seed + quoteOffset) % QUOTES.length;
+let quoteIdx = Math.floor(Math.random() * QUOTES.length);
+function nextQuote() {
+  if (QUOTES.length < 2) { renderQuote(); return; }
+  let i = quoteIdx;
+  while (i === quoteIdx) i = Math.floor(Math.random() * QUOTES.length);   // 换一句不重复
+  quoteIdx = i;
+  renderQuote();
 }
 function renderQuote() {
-  const q = QUOTES[quoteIndex()];
+  const q = QUOTES[quoteIdx];
   $('quote').textContent = q;
   if ($('quote2')) $('quote2').textContent = q;
   const n = new Date();
   $('quoteDate').textContent = (n.getMonth() + 1) + '月' + n.getDate() + '日';
 }
-$('quoteNext').addEventListener('click', () => {
-  quoteOffset++; LS.set('jxy_quote_off', quoteOffset); renderQuote();
-});
+$('quoteNext').addEventListener('click', nextQuote);
+setInterval(nextQuote, 15 * 60 * 1000);      // 每 15 分钟自动换一句
 
 /* ---------- 飘爱心 ---------- */
 (function floaty() {
