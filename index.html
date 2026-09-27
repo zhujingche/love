@@ -556,6 +556,23 @@ document.querySelectorAll('.tabbar button').forEach((b) => {
 $('goPet').addEventListener('click', () => showTab('pet'));
 
 /* ============================================================
+   一次性重置：改 RESET_TAG 的值即可让所有设备下次打开时爱心归零
+   也可手动强制归零：在网址后加 ?reset=1
+   ============================================================ */
+const RESET_TAG = 'hearts-0-2026-09-27';
+const FORCE_RESET = new URLSearchParams(location.search).get('reset') === '1';
+if (FORCE_RESET || LS.get('jxy_reset_tag', '') !== RESET_TAG) {
+  const _d = new Date();
+  const _today = _d.getFullYear() + '-' + pad(_d.getMonth() + 1) + '-' + pad(_d.getDate());
+  LS.set('jxy_hearts', 0);
+  LS.set('jxy_heart_day', { d: _today, used: 0 });
+  LS.set('jxy_reset_tag', RESET_TAG);
+  if (FORCE_RESET) {
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { }
+  }
+}
+
+/* ============================================================
    爱心（每天最多 2 颗，所有来源共用这个额度）
    ============================================================ */
 let hearts = LS.get('jxy_hearts', 0);
