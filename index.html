@@ -11,9 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="小站">
 <style>
-  :root{
-    --pink:#ff8fb8; --pink-deep:#ff5f9e; --ink:#5a3a47; --ink-soft:#8b6b78; --card:#ffffffd9;
-  }
+  :root{ --pink:#ff8fb8; --pink-deep:#ff5f9e; --ink:#5a3a47; --ink-soft:#8b6b78; --card:#ffffffd9; }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0;}
   body{
@@ -26,14 +24,9 @@
     overflow-x:hidden;
   }
   .floaty{position:fixed; top:-40px; font-size:20px; opacity:.7; pointer-events:none; animation:fall linear infinite; z-index:0;}
-  @keyframes fall{
-    0%{transform:translateY(-10vh) rotate(0deg); opacity:0}
-    10%{opacity:.8}
-    100%{transform:translateY(115vh) rotate(320deg); opacity:0}
-  }
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:0}10%{opacity:.8}100%{transform:translateY(115vh) rotate(320deg);opacity:0}}
   .wrap{position:relative; z-index:1; max-width:520px; margin:0 auto;}
 
-  /* 顶部天数 */
   .days-badge{
     margin:6px auto 14px; text-align:center;
     background:linear-gradient(135deg,#ff9ec4,#ff6aa6);
@@ -41,105 +34,84 @@
     box-shadow:0 10px 26px rgba(255,110,165,.38), inset 0 -3px 0 rgba(255,255,255,.35);
     position:relative; overflow:hidden;
   }
-  .days-badge::after{
-    content:""; position:absolute; top:-60%; left:-30%; width:80%; height:200%;
-    background:linear-gradient(90deg,#ffffff00,#ffffff55,#ffffff00);
-    transform:rotate(18deg); animation:shine 4.5s ease-in-out infinite;
-  }
+  .days-badge::after{content:"";position:absolute;top:-60%;left:-30%;width:80%;height:200%;
+    background:linear-gradient(90deg,#ffffff00,#ffffff55,#ffffff00);transform:rotate(18deg);animation:shine 4.5s ease-in-out infinite;}
   @keyframes shine{0%,60%{left:-40%}100%{left:120%}}
   .days-line{font-size:16px; letter-spacing:1px; opacity:.95; margin:2px 0 6px}
-  .days-num{
-    font-size:64px; line-height:1; font-weight:800;
-    text-shadow:0 4px 0 rgba(190,60,110,.35);
-    display:inline-block; animation:pop .7s cubic-bezier(.2,1.6,.4,1) both;
-  }
-  @keyframes pop{from{transform:scale(.5); opacity:0}to{transform:scale(1); opacity:1}}
-  .days-unit{font-size:20px; font-weight:700; margin-left:6px}
-  .days-sub{font-size:13px; opacity:.92; margin-top:8px}
+  .days-num{font-size:64px;line-height:1;font-weight:800;text-shadow:0 4px 0 rgba(190,60,110,.35);display:inline-block;animation:pop .7s cubic-bezier(.2,1.6,.4,1) both;}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .days-unit{font-size:20px;font-weight:700;margin-left:6px}
+  .days-sub{font-size:13px;opacity:.92;margin-top:8px}
   .days-name{font-weight:700}
 
-  /* 打招呼 */
-  .hello{
-    background:var(--card); backdrop-filter:blur(6px);
-    border-radius:20px; padding:16px 18px; margin-bottom:12px;
-    box-shadow:0 6px 18px rgba(255,140,180,.18);
-    display:flex; align-items:center; gap:12px;
-  }
+  .hello{background:var(--card);backdrop-filter:blur(6px);border-radius:20px;padding:16px 18px;margin-bottom:12px;
+    box-shadow:0 6px 18px rgba(255,140,180,.18);display:flex;align-items:center;gap:12px;}
   .hello .kitty{flex:0 0 54px}
-  .hello .txt{font-size:15.5px; line-height:1.65}
-  .hello .hi{font-weight:800; color:var(--pink-deep); font-size:16px; margin-bottom:3px}
+  .hello .txt{font-size:15.5px;line-height:1.65}
+  .hello .hi{font-weight:800;color:var(--pink-deep);font-size:16px;margin-bottom:3px}
 
-  /* 卡片 */
-  .card{
-    background:var(--card); backdrop-filter:blur(6px);
-    border-radius:18px; padding:14px 16px;
-    box-shadow:0 6px 16px rgba(255,140,180,.16);
-    margin-bottom:12px;
-  }
-  .card .k{font-size:12.5px; color:var(--ink-soft); margin-bottom:6px}
-  .card .v{font-size:17px; font-weight:700; color:var(--pink-deep)}
-  .card .v small{font-size:13px; font-weight:600; color:var(--ink-soft)}
-  .quote{font-size:15px; font-weight:600; line-height:1.8; color:var(--ink)}
+  .card{background:var(--card);backdrop-filter:blur(6px);border-radius:18px;padding:14px 16px;
+    box-shadow:0 6px 16px rgba(255,140,180,.16);margin-bottom:12px;}
+  .card .k{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px}
+  .card .v{font-size:17px;font-weight:700;color:var(--pink-deep)}
+  .card .v small{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .quote{font-size:15px;font-weight:600;line-height:1.8;color:var(--ink)}
 
-  /* 三个记录模块 */
-  .notes-title{
-    font-size:13.5px; color:var(--ink-soft); margin:18px 4px 8px;
-    display:flex; align-items:center; gap:8px;
-  }
-  .notes-title::before,.notes-title::after{content:""; height:1px; background:#ffd0e2; flex:1}
-  .note{
-    background:#fffdfe; border-radius:18px; padding:14px 14px 10px;
-    box-shadow:0 6px 16px rgba(255,140,180,.14); margin-bottom:12px;
-  }
-  .note-head{display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; margin-bottom:8px}
-  .dot{width:9px; height:9px; border-radius:50%; flex:0 0 9px}
-  .dot.bad{background:#ff9d9d}
-  .dot.good{background:#ffd166}
-  .dot.memo{background:#a4d8ff}
-  .note textarea{
-    width:100%; border:none; outline:none; resize:none;
-    background:#fff4f9; border-radius:12px; padding:11px 12px;
-    font-family:inherit; font-size:15px; line-height:1.75; color:var(--ink);
-    min-height:92px;
-  }
+  .notes-title{font-size:13.5px;color:var(--ink-soft);margin:18px 4px 8px;display:flex;align-items:center;gap:8px;}
+  .notes-title::before,.notes-title::after{content:"";height:1px;background:#ffd0e2;flex:1}
+  .note{background:#fffdfe;border-radius:18px;padding:14px 14px 8px;box-shadow:0 6px 16px rgba(255,140,180,.14);margin-bottom:12px;}
+  .note-head{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;margin-bottom:8px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+  .dot.bad{background:#ff9d9d}.dot.good{background:#ffd166}.dot.memo{background:#a4d8ff}
+  .note textarea{width:100%;border:none;outline:none;resize:none;background:#fff4f9;border-radius:12px;padding:11px 12px;
+    font-family:inherit;font-size:15px;line-height:1.75;color:var(--ink);min-height:88px;}
   .note textarea::placeholder{color:#c9a7b8}
-  .note .saved{font-size:11.5px; color:#c9a7b8; text-align:right; height:15px; line-height:15px}
-  .copy-btn{
-    width:100%; border:none; cursor:pointer;
-    background:linear-gradient(135deg,#ffb3d1,#ff7fb4); color:#fff;
-    font-size:15px; font-weight:700; letter-spacing:1px;
-    padding:14px; border-radius:18px; margin:4px 0 14px;
-    box-shadow:0 8px 18px rgba(255,127,180,.32);
-    transition:transform .12s;
-  }
-  .copy-btn:active{transform:scale(.98)}
+  .note .saved{font-size:11.5px;color:#c9a7b8;text-align:right;height:16px;line-height:16px}
 
-  /* 点我一下 */
-  .heart-btn{
-    width:100%; border:none; cursor:pointer;
-    background:linear-gradient(135deg,#ff9ec4,#ff5f9e); color:#fff;
-    font-size:17px; font-weight:800; letter-spacing:2px;
-    padding:16px; border-radius:20px; margin:2px 0 12px;
-    box-shadow:0 10px 22px rgba(255,95,158,.35);
-    transition:transform .12s;
-  }
+  .send-btn{width:100%;border:none;cursor:pointer;background:linear-gradient(135deg,#ff9ec4,#ff5f9e);color:#fff;
+    font-size:16.5px;font-weight:800;letter-spacing:1px;padding:16px;border-radius:20px;margin:2px 0 8px;
+    box-shadow:0 10px 22px rgba(255,95,158,.35);transition:transform .12s;}
+  .send-btn:active{transform:scale(.98)}
+  .send-btn:disabled{opacity:.6}
+  .send-tip{font-size:12px;color:#b58ba0;text-align:center;line-height:1.7;margin-bottom:14px;min-height:18px}
+
+  .heart-btn{width:100%;border:none;cursor:pointer;background:linear-gradient(135deg,#ffb3d1,#ff7fb4);color:#fff;
+    font-size:16px;font-weight:800;letter-spacing:2px;padding:14px;border-radius:18px;margin:2px 0 12px;
+    box-shadow:0 8px 18px rgba(255,127,180,.3);transition:transform .12s;}
   .heart-btn:active{transform:scale(.97)}
-  .secret{
-    background:#fff7fb; border:2px solid #ffd7e6; border-radius:18px;
-    padding:14px 16px; margin-bottom:12px; font-size:15px; line-height:1.85;
-    display:none; animation:pop .5s ease both;
-  }
+  .secret{background:#fff7fb;border:2px solid #ffd7e6;border-radius:18px;padding:14px 16px;margin-bottom:12px;
+    font-size:15px;line-height:1.85;display:none;animation:pop .5s ease both;}
   .secret.on{display:block}
   .secret b{color:var(--pink-deep)}
 
-  footer{text-align:center; font-size:12px; color:#b58ba0; line-height:1.9; padding:4px 0 2px}
-  footer .sign{font-weight:700; color:var(--pink-deep)}
+  footer{text-align:center;font-size:12px;color:#b58ba0;line-height:1.9;padding:4px 0 2px}
+  footer .sign{font-weight:700;color:var(--pink-deep)}
+
+  /* 设置面板（只有他去设置时才看到） */
+  #setup{display:none;background:#fff;border:2px solid #ffd7e6;border-radius:18px;padding:16px;margin-bottom:14px}
+  #setup.on{display:block}
+  #setup h3{margin:0 0 8px;font-size:15px}
+  #setup p{font-size:12.5px;color:var(--ink-soft);line-height:1.8;margin:0 0 10px}
+  #setup input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ffd0e2;font-size:14px;outline:none;margin-bottom:8px}
+  #setup button{border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,#ff9ec4,#ff5f9e);cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- ===== 顶部：在一起第 N 天（每天零点自动 +1） ===== -->
+  <!-- ===== 设置面板（?setup=1 打开，只有朱景澈需要） ===== -->
+  <div id="setup">
+    <h3>推送设置</h3>
+    <p>把收到的推送 token 粘进来并保存（只保存在这台手机）。<br>
+       PushPlus：微信扫码登录 pushplus.plus → 复制 token。<br>
+       Server酱：sct.ftqq.com 扫码 → 复制 SendKey（以 SCT 开头）。</p>
+    <input id="setupInput" placeholder="粘贴 token / SendKey">
+    <button id="setupSave">保存</button>
+    <span id="setupMsg" style="font-size:12px;color:#1f8b4c;margin-left:8px"></span>
+  </div>
+
+  <!-- ===== 顶部天数 ===== -->
   <div class="days-badge">
     <div class="days-line">恋爱第</div>
     <div><span class="days-num" id="days">29</span><span class="days-unit">天</span></div>
@@ -153,13 +125,11 @@
         <ellipse cx="32" cy="38" rx="20" ry="17" fill="#fff" stroke="#ff9ec4" stroke-width="2"/>
         <path d="M14 24 L18 8 L30 20 Z" fill="#fff" stroke="#ff9ec4" stroke-width="2"/>
         <path d="M50 24 L46 8 L34 20 Z" fill="#fff" stroke="#ff9ec4" stroke-width="2"/>
-        <circle cx="25" cy="36" r="2.6" fill="#5a3a47"/>
-        <circle cx="39" cy="36" r="2.6" fill="#5a3a47"/>
+        <circle cx="25" cy="36" r="2.6" fill="#5a3a47"/><circle cx="39" cy="36" r="2.6" fill="#5a3a47"/>
         <ellipse cx="32" cy="43" rx="3" ry="2.2" fill="#ffb3cd"/>
         <path d="M14 39 L6 36 M14 43 L6 45 M50 39 L58 36 M50 43 L58 45" stroke="#ffc2d9" stroke-width="1.6" fill="none" stroke-linecap="round"/>
         <g transform="translate(46,16)">
-          <path d="M0 0 L-7 -5 L-7 5 Z" fill="#ff6aa6"/>
-          <path d="M0 0 L7 -5 L7 5 Z" fill="#ff6aa6"/>
+          <path d="M0 0 L-7 -5 L-7 5 Z" fill="#ff6aa6"/><path d="M0 0 L7 -5 L7 5 Z" fill="#ff6aa6"/>
           <circle cx="0" cy="0" r="2.4" fill="#ff9ec4"/>
         </g>
       </svg>
@@ -170,19 +140,17 @@
     </div>
   </div>
 
-  <!-- ===== 在一起时长 ===== -->
   <div class="card">
     <div class="k">我们已经在一起</div>
     <div class="v" id="together">—</div>
   </div>
 
-  <!-- ===== 每天一句 ===== -->
   <div class="card">
     <div class="k">今天想对你说</div>
     <div class="quote" id="quote">—</div>
   </div>
 
-  <!-- ===== 三个记录模块（她自己写，自动保存在她手机上） ===== -->
+  <!-- ===== 三个模块 ===== -->
   <div class="notes-title">写给你</div>
 
   <div class="note">
@@ -203,13 +171,14 @@
     <div class="saved" id="s3"></div>
   </div>
 
-  <button class="copy-btn" id="copyBtn">复制这三段，发给朱景澈</button>
+  <button class="send-btn" id="sendBtn">写完啦，发给他</button>
+  <div class="send-tip" id="sendTip">写完点一下，他微信马上就能收到</div>
 
   <!-- ===== 彩蛋 ===== -->
   <button class="heart-btn" id="btn">点我一下</button>
   <div class="secret" id="secret">
     <b>江鑫颖</b>，以后不管开心还是不开心的，都可以写在这儿，<br>
-    或者直接跟我说。我都想知道。 🥰
+    或者直接跟我说。我都想知道。
   </div>
 
   <footer>
@@ -217,6 +186,9 @@
     <div id="clock">—</div>
   </footer>
 </div>
+
+<!-- 隐藏 iframe：用于跨域提交推送（避开浏览器跨域限制，必定送达） -->
+<iframe name="pushFrame" style="display:none" title="push"></iframe>
 
 <script>
 /* ============================================================
@@ -226,31 +198,35 @@
 const START = new Date(2026, 7, 30);   // 月份从 0 开始：7 = 8 月
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/* ============================================================
+   推送配置：把 token 填在这里（或手机打开 ?setup=1 手动设置）
+   type: 'pushplus'（推荐） | 'serverchan'
+   ============================================================ */
+const PUSH = { type: 'pushplus', token: '' };
+
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+
 function daysTogether(now = new Date()) {
   const a = new Date(START.getFullYear(), START.getMonth(), START.getDate());
   const b = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.floor((b - a) / DAY_MS) + 1;      // 含当天
+  return Math.floor((b - a) / DAY_MS) + 1;
 }
-const $ = (id) => document.getElementById(id);
-const pad = (n) => String(n).padStart(2, '0');
 
 function renderDays() {
   const now = new Date();
   $('days').textContent = daysTogether(now);
   document.title = '在一起第 ' + daysTogether(now) + ' 天';
-
   const ms = now - START;
   const dd = Math.floor(ms / DAY_MS);
   const hh = Math.floor(ms % DAY_MS / 3600000);
   const mm = Math.floor(ms % 3600000 / 60000);
   const ss = Math.floor(ms % 60000 / 1000);
   $('together').innerHTML = dd + ' 天 ' + hh + ' 时 <small>' + pad(mm) + ' 分 ' + pad(ss) + ' 秒</small>';
-
   $('clock').textContent = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
     + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
 }
 
-/* 问候（按时段） */
 function renderGreet() {
   const h = new Date().getHours();
   let g = '晚上好', m = '今天辛苦啦，早点休息。';
@@ -262,7 +238,6 @@ function renderGreet() {
   $('helloMsg').textContent = m;
 }
 
-/* 每天一句（同一天固定） */
 const QUOTES = [
   '你笑起来的时候，我这边天气就晴了。',
   '想和你把普通的日子，一天一天过成纪念日。',
@@ -281,7 +256,6 @@ function renderQuote() {
   $('quote').textContent = QUOTES[seed % QUOTES.length];
 }
 
-/* 漂浮爱心 */
 (function floaty() {
   const chars = ['💗', '🎀', '💕', '🌸'];
   for (let i = 0; i < 10; i++) {
@@ -296,48 +270,126 @@ function renderQuote() {
   }
 })();
 
-/* ====== 三个模块：自动保存（存在她手机本地） ====== */
+/* ================= 三个模块：本地自动保存 ================= */
 const NOTES = [
   { id: 'n1', key: 'jxy_note_bad',  saved: 's1', title: '最近不开心的事' },
   { id: 'n2', key: 'jxy_note_good', saved: 's2', title: '最近开心的事' },
   { id: 'n3', key: 'jxy_note_memo', saved: 's3', title: '我想要朱景澈牢牢记住的事' }
 ];
+const SENT_KEY = 'jxy_last_sent';
 
-NOTES.forEach((n) => {
-  const ta = $(n.id);
-  const tip = $(n.saved);
-  try {
-    const v = localStorage.getItem(n.key);
-    if (v) { ta.value = v; tip.textContent = '已保存'; }
-  } catch (e) { }
-
-  let t = null;
-  ta.addEventListener('input', () => {
-    try { localStorage.setItem(n.key, ta.value); } catch (e) { }
-    tip.textContent = '已保存';
-    clearTimeout(t);
-    t = setTimeout(() => { tip.textContent = '已保存'; }, 400);
+notesInit();
+function notesInit() {
+  NOTES.forEach((n) => {
+    const ta = $(n.id), tip = $(n.saved);
+    try { const v = localStorage.getItem(n.key); if (v) ta.value = v; } catch (e) { }
+    ta.addEventListener('input', () => {
+      try { localStorage.setItem(n.key, ta.value); } catch (e) { }
+      tip.textContent = '已保存';
+    });
+    if (ta.value) tip.textContent = '已保存';
   });
-});
+  try {
+    const t = localStorage.getItem(SENT_KEY);
+    if (t) $('sendTip').textContent = '上次发送：' + t;
+  } catch (e) { }
+  if (new URLSearchParams(location.search).get('setup') === '1') {
+    $('setup').classList.add('on');
+    try { $('setupInput').value = localStorage.getItem('jxy_push_token') || ''; } catch (e) { }
+  }
+}
 
-/* 复制三段文字 → 方便她直接发给他 */
-$('copyBtn').addEventListener('click', async function () {
-  const text = NOTES.map((n) => '【' + n.title + '】\n' + ($(n.id).value.trim() || '（还没写）')).join('\n\n');
-  let ok = false;
-  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { }
-  if (!ok) {                                    // 旧浏览器的兜底方案
+/* 取当前 token：页面里写死的优先，其次是本机设置 */
+function getToken() {
+  if (PUSH.token) return PUSH.token;
+  try { return localStorage.getItem('jxy_push_token') || ''; } catch (e) { return ''; }
+}
+function getType() {
+  const t = getToken();
+  if (t.startsWith('SCT')) return 'serverchan';
+  try { return localStorage.getItem('jxy_push_type') || PUSH.type; } catch (e) { return PUSH.type; }
+}
+
+/* 通过隐藏表单跨域提交（不受浏览器 CORS 限制，保证送达） */
+function pushToHim(title, text) {
+  const token = getToken();
+  if (!token) return false;
+  const type = getType();
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.target = 'pushFrame';
+  form.style.display = 'none';
+  let action = '', fields = {};
+  if (type === 'serverchan') {
+    action = 'https://sctapi.ftqq.com/' + token + '.send';
+    fields = { title: title, desp: text };
+  } else {
+    action = 'https://www.pushplus.plus/send';
+    fields = { token: token, title: title, content: text.replace(/\n/g, '<br>'), template: 'html' };
+  }
+  form.action = action;
+  Object.keys(fields).forEach((k) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = k; i.value = fields[k];
+    form.appendChild(i);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => form.remove(), 1000);
+  return true;
+}
+
+/* 组三段文字 */
+function buildText() {
+  const now = new Date();
+  const stamp = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+    + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+  let s = '江鑫颖 写于 ' + stamp + '\n';
+  NOTES.forEach((n) => { s += '\n【' + n.title + '】\n' + ($(n.id).value.trim() || '（没写）') + '\n'; });
+  return s;
+}
+
+/* 发送按钮 */
+$('sendBtn').addEventListener('click', function () {
+  const hasAny = NOTES.some((n) => $(n.id).value.trim());
+  if (!hasAny) { $('sendTip').textContent = '还没写内容呢～'; return; }
+
+  const text = buildText();
+  const ok = pushToHim('江鑫颖 写了新内容', text);
+
+  if (!ok) {                                  // 没配置 token：退回复制方式
     const tmp = document.createElement('textarea');
     tmp.value = text; tmp.style.position = 'fixed'; tmp.style.opacity = '0';
     document.body.appendChild(tmp); tmp.select();
-    try { ok = document.execCommand('copy'); } catch (e) { }
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (e) { }
     tmp.remove();
+    $('sendTip').textContent = copied
+      ? '已复制，粘贴到微信发给朱景澈吧'
+      : '请长按选中上面的文字，复制后发给他';
+    return;
   }
-  const btn = this;
-  btn.textContent = ok ? '已复制，去微信粘贴发给他吧' : '复制失败，长按选中文字手动复制';
-  setTimeout(() => { btn.textContent = '复制这三段，发给朱景澈'; }, 2200);
+
+  const now = new Date();
+  const stamp = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+    + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+  try { localStorage.setItem(SENT_KEY, stamp); } catch (e) { }
+  $('sendTip').textContent = '已发送 ✅ 他微信马上就能收到（' + stamp + '）';
+  this.textContent = '已发送 ✅';
+  setTimeout(() => { this.textContent = '写完啦，发给他'; }, 2000);
 });
 
-/* 点我一下：爱心爆炸 */
+/* 设置面板保存 */
+$('setupSave').addEventListener('click', function () {
+  const v = $('setupInput').value.trim();
+  try {
+    localStorage.setItem('jxy_push_token', v);
+    localStorage.setItem('jxy_push_type', v.startsWith('SCT') ? 'serverchan' : 'pushplus');
+  } catch (e) { }
+  $('setupMsg').textContent = '已保存';
+});
+
+/* 彩蛋 */
 $('btn').addEventListener('click', function () {
   $('secret').classList.add('on');
   const chars = ['💗', '💖', '💕', '🎀', '🌸', '✨'];
@@ -362,7 +414,6 @@ renderDays(); renderGreet(); renderQuote();
 setInterval(renderDays, 1000);
 setInterval(() => { renderGreet(); renderQuote(); }, 60000);
 
-/* 离线缓存：打开过一次后没网也能看 */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
