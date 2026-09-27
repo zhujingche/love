@@ -101,12 +101,12 @@
 
   /* ===== 桌宠 ===== */
   .pet-area{
-    position:relative;height:300px;border-radius:20px;overflow:hidden;margin-bottom:12px;
+    position:relative;height:342px;border-radius:20px;overflow:hidden;margin-bottom:12px;
     background:linear-gradient(180deg,#fff6fb 0%,#ffe9f3 70%,#ffe0ee 100%);
     border:2px solid var(--line);
   }
-  .pet-area .floor{position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(180deg,#ffe0ee,#ffd0e4)}
-  .pet-wrap{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);width:212px;height:232px}
+  .pet-area .floor{position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(180deg,#ffe0ee,#ffd0e4);z-index:1}
+  .pet-wrap{position:absolute;left:50%;bottom:42px;transform:translateX(-50%);width:212px;height:226px;z-index:2}
   /* 两层包裹：petAnim 负责待机呼吸/左右轻摆，petAct 负责点击、吃东西、拉屎等一次性动作 */
   .pet-anim,.pet-act{position:relative;width:100%;height:100%;transform-origin:50% 92%}
   .pet-anim{animation:breathe 3.2s ease-in-out infinite}
@@ -169,7 +169,7 @@
     98%{transform:scaleY(0);opacity:0}
   }
   /* 特效层（爱心、胡萝卜、便便、星星） */
-  .fx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
   .fx i{position:absolute;font-style:normal;font-size:20px;transition:transform 1s ease-out,opacity 1s ease-out}
   .fx i.pop{animation:fxPop .9s ease both}
   @keyframes fxPop{0%{transform:translateY(0) scale(.4);opacity:0}30%{opacity:1}100%{transform:translateY(-46px) scale(1.15);opacity:0}}
@@ -182,11 +182,11 @@
   .lay.deco{top:128px;font-size:30px;left:auto;right:0;transform:none}
   #petSvg{width:100%;height:100%}
   #petSvg svg,#petSvg img{width:100%;height:100%;display:block;object-fit:contain}
-  .poops{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:10px;font-size:24px}
+  .poops{position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:10px;font-size:24px;z-index:3}
   .poop{animation:pop .4s ease both}
   @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
   .bubble{
-    position:absolute;left:50%;transform:translateX(-50%);top:8px;max-width:86%;
+    position:absolute;left:50%;transform:translateX(-50%);top:8px;max-width:88%;z-index:6;
     background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px 12px;
     font-size:13px;line-height:1.6;box-shadow:0 4px 12px rgba(255,140,180,.2);
   }
@@ -245,7 +245,7 @@
 
   <!-- ================= 首页 ================= -->
   <section class="view on" id="view-home">
-    <div class="top-title">江鑫颖姐姐的专属空间<small>只给一个人看</small></div>
+    <div class="top-title">江鑫颖姐姐的专属空间</div>
 
     <div class="days-badge">
       <div class="days-line">在一起第</div>
@@ -261,9 +261,6 @@
 
     <div class="card">
       <div class="k"><span>我的爱心</span><span><span class="hearts">💗 <span id="heartsHome">0</span></span> <span id="heartBudgetHome" style="font-size:11.5px;color:#bb92a4"></span></span></div>
-      <div class="row" style="margin-bottom:8px">
-        <div class="col" style="font-size:13px;color:var(--ink-soft)">每天最多只能拿 2 个爱心，照顾好憨豆就有</div>
-      </div>
       <button class="btn" id="checkinBtn">每日签到</button>
       <div id="checkinTip" style="font-size:12px;color:#bb92a4;text-align:center;margin-top:8px"></div>
     </div>
@@ -279,7 +276,7 @@
 
   <!-- ================= 情话 ================= -->
   <section class="view" id="view-love">
-    <div class="top-title">情话<small>想让你知道的事</small></div>
+    <div class="top-title">情话</div>
 
     <div class="card">
       <div class="k"><span>今天的情话</span><span class="hearts">💗</span></div>
@@ -292,13 +289,13 @@
       <label class="lb">我不喜欢的事</label>
       <textarea id="dislike" rows="4" placeholder="不喜欢什么，都可以写"></textarea>
       <div style="margin-top:12px"><button class="btn" id="loveSend">写好了，让他知道</button></div>
-      <div class="muted" id="loveTip">他会马上收到通知</div>
+      <div class="muted" id="loveTip"></div>
     </div>
   </section>
 
   <!-- ================= 消气 ================= -->
   <section class="view" id="view-anger">
-    <div class="top-title">消气<small>生气了就写在这儿，我照做</small></div>
+    <div class="top-title">消气</div>
 
     <div class="card">
       <label class="lb">生气程度</label>
@@ -316,7 +313,7 @@
       <textarea id="angerWant" rows="2" placeholder="例如：现在打电话给我 / 买奶茶 / 不许再回消息慢"></textarea>
 
       <div style="margin-top:12px"><button class="btn" id="angerSend">发给他</button></div>
-      <div class="muted" id="angerTip">可以随时发，他会立刻收到</div>
+      <div class="muted" id="angerTip"></div>
     </div>
 
     <div class="card">
@@ -372,12 +369,10 @@
         <div class="col"><button class="btn small ghost" id="playBtn">🎮 玩游戏</button></div>
         <div class="col"><button class="btn small ghost" id="cleanBtn">🧹 铲屎</button></div>
       </div>
-      <div class="muted" id="petTip">点它会动 · 喂食 / 铲屎可赚爱心（每天最多 2 个）</div>
     </div>
 
     <div class="card">
       <div class="k"><span>换装商店</span><span class="hearts">💗 <span id="heartsShop">0</span></span></div>
-      <div class="muted" style="padding:2px 0 10px">用爱心兑换，点一下穿上／脱下</div>
       <div class="shop-grid" id="shop"></div>
     </div>
   </section>
@@ -648,7 +643,7 @@ function renderAnger() {
   const list = LS.get('jxy_anger', []);
   $('angerCount').textContent = list.length ? list.length + ' 条' : '';
   const box = $('angerList');
-  if (!list.length) { box.innerHTML = '<div class="muted">还没有记过，生气的时候写一条吧</div>'; return; }
+  if (!list.length) { box.innerHTML = '<div class="muted">还没有记过咧姐姐~</div>'; return; }
   box.innerHTML = '';
   list.slice(0, 20).forEach((it) => {
     const d = document.createElement('div');
