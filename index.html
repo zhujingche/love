@@ -101,23 +101,23 @@
 
   /* ===== 桌宠 ===== */
   .pet-area{
-    position:relative;height:250px;border-radius:20px;overflow:hidden;margin-bottom:12px;
+    position:relative;height:300px;border-radius:20px;overflow:hidden;margin-bottom:12px;
     background:linear-gradient(180deg,#fff6fb 0%,#ffe9f3 70%,#ffe0ee 100%);
     border:2px solid var(--line);
   }
   .pet-area .floor{position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(180deg,#ffe0ee,#ffd0e4)}
-  .pet-wrap{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);width:170px;height:170px;transition:transform .18s}
+  .pet-wrap{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);width:212px;height:232px;transition:transform .18s}
   .pet-wrap.happy{animation:jump .5s ease}
   @keyframes jump{0%,100%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(-16px)}}
   .pet-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 8px rgba(200,120,160,.25))}
   /* 换装图层(emoji 浮层)：位置按兔子身体比例调过 */
   .lay{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;line-height:1}
-  .lay.hat{top:30px;font-size:34px}
-  .lay.glasses{top:78px;font-size:31px}
-  .lay.clothes{top:124px;font-size:44px}
-  .lay.deco{top:106px;font-size:30px;left:auto;right:-4px;transform:none}
+  .lay.hat{top:52px;font-size:34px}
+  .lay.glasses{top:96px;font-size:30px}
+  .lay.clothes{top:148px;font-size:46px}
+  .lay.deco{top:128px;font-size:30px;left:auto;right:0;transform:none}
   #petSvg{width:100%;height:100%}
-  #petSvg svg{width:100%;height:100%;display:block}
+  #petSvg svg,#petSvg img{width:100%;height:100%;display:block;object-fit:contain}
   .poops{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:10px;font-size:24px}
   .poop{animation:pop .4s ease both}
   @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
