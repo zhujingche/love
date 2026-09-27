@@ -406,11 +406,8 @@
   </section>
 </div>
 
-<!-- 背景音乐：优先播放自制的 bgm.mp3；没有 mp3 时播放占位 bgm.wav -->
-<audio id="bgm" loop preload="none" playsinline>
-  <source src="bgm.mp3" type="audio/mpeg">
-  <source src="bgm.wav" type="audio/wav">
-</audio>
+<!-- 背景音乐：优先走 jsDelivr CDN（速度快），失败/超时自动切回本仓库文件 -->
+<audio id="bgm" loop preload="none" playsinline></audio>
 <button id="musicBtn" class="music-btn" title="背景音乐">🎵</button>
 
 <!-- ================= 底部导航 ================= -->
@@ -1140,8 +1137,32 @@ setInterval(renderQuote, 60000);
    背景音乐（浏览器规定必须由用户点一下才能出声）
    ============================================================ */
 const bgm = $('bgm'), musicBtn = $('musicBtn');
-let bgmWanted = LS.get('jxy_bgm', 'on') === 'on';
-let bgmStarted = false;
+/* 音源：CDN 优先（对国内网络快 5 倍以上），拿不到就自动切回仓库里的文件 */
+const BGM_SOURCES = [
+  'https://cdn.jsdelivr.net/gh/zhujingche/love@7270dc5826381d253939933f122cb882aa80bedc/bgm.mp3',
+  'bgm.mp3',
+  'bgm.wav'
+];
+let bgmSrcIdx = 0, bgmWanted = LS.get('jxy_bgm', 'on') === 'on', bgmStarted = false;
+bgm.src = BGM_SOURCES[0];
+
+function nextBgmSource() {
+  if (bgmSrcIdx >= BGM_SOURCES.length - 1) return false;
+  bgmSrcIdx++;
+  const wasPlaying = !bgm.paused;
+  bgm.src = BGM_SOURCES[bgmSrcIdx];
+  bgm.load();
+  if (wasPlaying && bgmWanted) { bgmStarted = false; startBgm(); }
+  return true;
+}
+/* 7 秒内没读到元数据（说明这个源太慢或不通）→ 换源 */
+setInterval(() => {
+  if (!bgmStarted && bgmWanted && !(bgm.duration > 0)) {
+    if (bgm._slowTicks === undefined) bgm._slowTicks = 0;
+    if (++bgm._slowTicks >= 3) { bgm._slowTicks = 0; nextBgmSource(); }
+  }
+}, 3500);
+bgm.addEventListener('error', () => { nextBgmSource(); });
 
 function paintMusic() {
   const playing = !bgm.paused;                 // 只要没暂停就算在播
