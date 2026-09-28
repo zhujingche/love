@@ -10,6 +10,17 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="专属空间">
+<script>
+/* 已解锁过的设备（30 天内）直接跳过锁屏；网址后加 ?lock=1 可强制重新上锁 */
+(function () {
+  try {
+    var raw = localStorage.getItem('jxy_unlocked');
+    var t = raw ? JSON.parse(raw) : 0;
+    if (location.search.indexOf('lock=1') >= 0) { localStorage.removeItem('jxy_unlocked'); t = 0; }
+    else if (t && Date.now() - t < 2592000000) { document.documentElement.className += ' unlocked'; }
+  } catch (e) { }
+})();
+</script>
 <style>
   :root{
     --pink:#ff8fb8; --pink-deep:#ff5f9e; --pink-soft:#ffe6f0;
@@ -260,9 +271,57 @@
   .music-btn.playing{animation:mpulse 2.4s ease-in-out infinite; background:linear-gradient(135deg,#fff0f7,#ffd7e9)}
   @keyframes mpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,120,170,.5)}50%{box-shadow:0 0 0 9px rgba(255,120,170,0)}}
   .music-btn.off{opacity:.5; filter:grayscale(1)}
+  /* ===== 锁屏（4 位数字密码） ===== */
+  html.unlocked #lock{display:none !important}
+  .lock{
+    position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(175deg,#ffe4ef 0%,#ffd3e6 55%,#ffeaf3 100%);
+    padding:24px; text-align:center;
+  }
+  .lock.gone{opacity:0; transform:scale(1.04); pointer-events:none; transition:opacity .35s, transform .35s}
+  .lock-box{width:100%; max-width:320px}
+  .lock-emoji{font-size:44px; line-height:1; margin-bottom:10px; animation:lockFloat 3s ease-in-out infinite}
+  @keyframes lockFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .lock-title{font-size:19px; font-weight:800; color:var(--pink-deep); letter-spacing:.5px}
+  .lock-sub{font-size:13px; color:#a9829a; margin-top:6px}
+  .lock-dots{display:flex; justify-content:center; gap:16px; margin:22px 0 6px}
+  .lock-dots i{
+    width:15px; height:15px; border-radius:50%; border:2px solid #ffb6d2; background:#fff;
+    transition:transform .15s, background .15s;
+  }
+  .lock-dots i.on{background:linear-gradient(135deg,#ff9ec4,#ff5f9e); border-color:#ff8fb8; transform:scale(1.15)}
+  .lock.shake .lock-dots{animation:lockShake .42s}
+  @keyframes lockShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}55%{transform:translateX(9px)}80%{transform:translateX(-4px)}}
+  .lock-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px}
+  .lock-pad button{
+    height:58px; border-radius:18px; border:2px solid #ffd0e2; background:#fffffff2; cursor:pointer;
+    font-size:23px; font-weight:800; color:var(--pink-deep); font-family:inherit;
+    box-shadow:0 4px 12px rgba(255,140,180,.16); transition:transform .1s;
+  }
+  .lock-pad button:active{transform:scale(.94); background:linear-gradient(135deg,#fff0f7,#ffd7e9)}
+  .lock-pad button.blank{visibility:hidden}
+  .lock-msg{font-size:13px; color:#d4577f; height:20px; margin-top:14px; font-weight:600}
 </style>
 </head>
 <body>
+
+<!-- ================= 锁屏（4 位数字密码） ================= -->
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <div class="lock-emoji">🔒</div>
+    <div class="lock-title">江鑫颖姐姐的专属空间</div>
+    <div class="lock-sub">输入 4 位数字密码</div>
+    <div class="lock-dots" id="lockDots"><i></i><i></i><i></i><i></i></div>
+    <div class="lock-pad" id="lockPad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button class="blank" disabled></button><button data-k="0">0</button><button data-k="del">⌫</button>
+    </div>
+    <div class="lock-msg" id="lockMsg"></div>
+  </div>
+</div>
+
 <div class="wrap">
 
   <!-- ================= 首页 ================= -->
@@ -1132,6 +1191,52 @@ setInterval(renderQuote, 60000);
     }
   }
 })();
+
+/* ============================================================
+   锁屏：4 位数字密码
+   ============================================================ */
+const PASSCODE = '1110';
+let pin = '';
+const lockEl = $('lock');
+
+function paintPin() {
+  document.querySelectorAll('#lockDots i').forEach((el, i) => el.classList.toggle('on', i < pin.length));
+}
+function lockFail(msg) {
+  lockEl.classList.add('shake');
+  $('lockMsg').textContent = msg || '密码不对哦，再想想～';
+  try { beep(240, 0.16); } catch (e) { }
+  setTimeout(() => { lockEl.classList.remove('shake'); pin = ''; paintPin(); }, 440);
+}
+function unlockSite() {
+  LS.set('jxy_unlocked', Date.now());
+  document.documentElement.classList.add('unlocked');
+  lockEl.classList.add('gone');
+  setTimeout(() => { lockEl.style.display = 'none'; }, 380);
+  try { beep(880, 0.14); } catch (e) { }
+  startBgm();                                  // 解锁这一下正好是"用户手势"，音乐可以开始了
+}
+function pressKey(k) {
+  if (!k) return;
+  if (k === 'del') { pin = pin.slice(0, -1); paintPin(); return; }
+  if (pin.length >= 4 || pin === PASSCODE) return;
+  pin += k;
+  paintPin();
+  if (pin.length === 4) {
+    if (pin === PASSCODE) { $('lockMsg').textContent = '欢迎回来，姐姐 ♡'; unlockSite(); }
+    else { lockFail(); }
+  }
+}
+$('lockPad').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-k]');
+  if (b) pressKey(b.dataset.k);
+});
+window.addEventListener('keydown', (e) => {
+  if (document.documentElement.classList.contains('unlocked')) return;
+  if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+  else if (e.key === 'Backspace') pressKey('del');
+});
+paintPin();
 
 /* ============================================================
    背景音乐（浏览器规定必须由用户点一下才能出声）
