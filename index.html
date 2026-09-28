@@ -11,14 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="专属空间">
 <script>
-/* 已解锁过的设备（30 天内）直接跳过锁屏；网址后加 ?lock=1 可强制重新上锁 */
+/* 每次进入（打开/刷新）都必须重新输入密码，不记住解锁状态 */
 (function () {
-  try {
-    var raw = localStorage.getItem('jxy_unlocked');
-    var t = raw ? JSON.parse(raw) : 0;
-    if (location.search.indexOf('lock=1') >= 0) { localStorage.removeItem('jxy_unlocked'); t = 0; }
-    else if (t && Date.now() - t < 2592000000) { document.documentElement.className += ' unlocked'; }
-  } catch (e) { }
+  try { localStorage.removeItem('jxy_unlocked'); } catch (e) { }   // 清掉以前遗留的"记住解锁"标记
 })();
 </script>
 <style>
@@ -1209,7 +1204,6 @@ function lockFail(msg) {
   setTimeout(() => { lockEl.classList.remove('shake'); pin = ''; paintPin(); }, 440);
 }
 function unlockSite() {
-  LS.set('jxy_unlocked', Date.now());
   document.documentElement.classList.add('unlocked');
   lockEl.classList.add('gone');
   setTimeout(() => { lockEl.style.display = 'none'; }, 380);
