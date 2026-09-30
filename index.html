@@ -579,12 +579,15 @@ function getType() {
   if (t.startsWith('SCT')) return 'serverchan';
   try { return localStorage.getItem('jxy_push_type') || PUSH.type; } catch (e) { return PUSH.type; }
 }
-async function pushToHim(title, text) {
+async function pushToHim(title, text, prio) {
   try {
     const r = await fetch('https://ntfy.sh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: NTFY_TOPIC, title: title, message: text, tags: ['heart'] })
+      body: JSON.stringify({
+        topic: NTFY_TOPIC, title: title, message: text, tags: ['heart'],
+        priority: prio || 3                       // 3=默认(短震) 4=高(长震+弹窗) 5=最高(最强震动)
+      })
     });
     if (r.ok) return 'ntfy';
   } catch (e) { }
@@ -715,7 +718,7 @@ $('loveSend').addEventListener('click', async function () {
   const text = '江鑫颖 写于 ' + stamp() + '\n'
     + '\n【我想要朱景澈牢牢记住的事】\n' + (memo || '（没写）') + '\n'
     + '\n【我不喜欢的事】\n' + (dis || '（没写）') + '\n';
-  await pushToHim('江鑫颖 的情话', text);
+  await pushToHim('江鑫颖 的情话', text, 4);          // 情话=高优先级(长震动+弹窗)
   this.disabled = false;
   $('loveTip').textContent = '已发给他 ✅ ' + stamp();
   this.textContent = '已发送 ✅';
@@ -768,7 +771,7 @@ $('angerSend').addEventListener('click', async function () {
     + '\n【生气程度】' + LV_EMO[angerLevel] + ' ' + LV_NAME[angerLevel] + '\n'
     + '\n【因为什么事】\n' + txt + '\n'
     + '\n【要他做什么才能消气】\n' + (want || '（她还没写，快去问她）') + '\n';
-  await pushToHim('江鑫颖生气了 ' + LV_EMO[angerLevel], msg);
+  await pushToHim('江鑫颖生气了 ' + LV_EMO[angerLevel], msg, 5);   // 消气=最高优先级(最强震动)
   this.disabled = false;
   $('angerTip').textContent = '已发给他 ✅ 等他来找你';
   $('angerText').value = ''; $('angerWant').value = '';
