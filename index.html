@@ -94,14 +94,27 @@
   textarea::placeholder,input::placeholder{color:#cfa9ba}
   label.lb{display:block;font-size:13px;color:var(--ink-soft);margin:10px 0 5px;font-weight:600}
 
-  /* ===== 消气：程度 ===== */
-  .levels{display:flex;gap:8px}
-  .levels button{
-    flex:1;border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px 4px;
-    font-size:12.5px;color:var(--ink-soft);font-weight:700;cursor:pointer;line-height:1.5;
+  /* ===== 心情：5 个心情按钮 ===== */
+  .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .moods button{
+    border:2px solid var(--line);background:#fff;border-radius:14px;padding:9px 2px;
+    font-size:10.5px;color:var(--ink-soft);font-weight:700;cursor:pointer;line-height:1.45;
+    transition:transform .14s,border-color .14s,background .14s;font-family:inherit;
   }
-  .levels button .e{display:block;font-size:20px;margin-bottom:2px}
-  .levels button.on{background:#fff0f6;border-color:var(--pink);color:var(--pink-deep);transform:translateY(-1px)}
+  .moods button .e{display:block;font-size:22px;margin-bottom:2px;transition:transform .18s}
+  .moods button:active{transform:scale(.94)}
+  .moods button.on{background:linear-gradient(135deg,#fff2f9,#ffe4f0);border-color:var(--pink);color:var(--pink-deep)}
+  .moods button.on .e{transform:scale(1.25) rotate(-6deg)}
+  .mood-strip{display:flex;gap:5px;overflow-x:auto;padding:2px 0 2px}
+  .mood-strip::-webkit-scrollbar{height:0}
+  .mood-day{flex:0 0 auto;width:42px;text-align:center}
+  .mood-day .d{font-size:10.5px;color:#a9bccb}
+  .mood-day .e{font-size:24px;line-height:1.4;display:block}
+  .mood-day .e.empty{opacity:.25;font-size:20px}
+  .mood-day .b{height:4px;border-radius:3px;background:#ffe4f0;margin-top:2px;overflow:hidden}
+  .mood-day .b i{display:block;height:100%;border-radius:3px}
+  .mood-tag{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:9px;background:#fff0f7;color:#e2568c}
+  .mood-day.today .d{color:#e2568c;font-weight:800}
 
   /* ===== 列表项 ===== */
   .item{background:#fffdfe;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
@@ -446,32 +459,36 @@
     </div>
   </section>
 
-  <!-- ================= 消气 ================= -->
-  <section class="view" id="view-anger">
-    <div class="top-title">消气</div>
+  <!-- ================= 心情 ================= -->
+  <section class="view" id="view-mood">
+    <div class="top-title">心情</div>
 
     <div class="card">
-      <label class="lb">生气程度</label>
-      <div class="levels" id="levels">
-        <button data-lv="1"><span class="e">🙂</span>一点点</button>
-        <button data-lv="2"><span class="e">😐</span>有点气</button>
-        <button data-lv="3"><span class="e">😠</span>很生气</button>
-        <button data-lv="4"><span class="e">🤯</span>超生气</button>
+      <div class="k"><span>今天的心情</span><span id="moodDate"></span></div>
+      <div class="moods" id="moods">
+        <button data-lv="5"><span class="e">😆</span>开心到冒泡</button>
+        <button data-lv="4"><span class="e">😊</span>挺开心的</button>
+        <button data-lv="3"><span class="e">😐</span>就那样</button>
+        <button data-lv="2"><span class="e">🥺</span>有点难过</button>
+        <button data-lv="1"><span class="e">😢</span>好伤心</button>
       </div>
 
-      <label class="lb">因为什么事</label>
-      <textarea id="angerText" rows="3" placeholder="什么事敢惹我姐姐生气!"></textarea>
+      <label class="lb">想说点什么呀</label>
+      <textarea id="moodText" rows="4" placeholder="今天发生的小事，开心的、难过的，都可以写给我～"></textarea>
 
-      <label class="lb">要朱景澈做什么才能消气</label>
-      <textarea id="angerWant" rows="2" placeholder="例如：现在打电话给我 / 买奶茶 / 不许再回消息慢"></textarea>
-
-      <div style="margin-top:12px"><button class="btn" id="angerSend">发给他</button></div>
-      <div class="muted" id="angerTip"></div>
+      <div style="margin-top:12px"><button class="btn" id="moodSave">记下来 ♡</button></div>
+      <div style="margin-top:8px"><button class="btn ghost small" id="moodSend">让他知道</button></div>
+      <div class="muted" id="moodTip"></div>
     </div>
 
     <div class="card">
-      <div class="k"><span>以前记过的</span><span id="angerCount"></span></div>
-      <div id="angerList"></div>
+      <div class="k"><span>最近 7 天</span><span id="moodStat"></span></div>
+      <div class="mood-strip" id="moodStrip"></div>
+    </div>
+
+    <div class="card">
+      <div class="k"><span>心情小日记</span><span id="moodCount"></span></div>
+      <div id="moodList"></div>
     </div>
   </section>
 
@@ -539,7 +556,7 @@
 <nav class="tabbar">
   <button data-tab="home" class="on"><span class="e">🏠</span>首页</button>
   <button data-tab="love"><span class="e">💌</span>情话</button>
-  <button data-tab="anger"><span class="e">😤</span>消气</button>
+  <button data-tab="mood"><span class="e">🌈</span>心情</button>
   <button data-tab="pet"><span class="e">🐣</span>憨豆</button>
 </nav>
 
@@ -797,59 +814,122 @@ $('loveSend').addEventListener('click', async function () {
 });
 
 /* ============================================================
-   消气模块
+   心情模块（每天一条心情，标注日期，存在她手机里）
    ============================================================ */
-let angerLevel = 0;
-document.querySelectorAll('#levels button').forEach((b) => {
-  b.addEventListener('click', () => {
-    angerLevel = +b.dataset.lv;
-    document.querySelectorAll('#levels button').forEach((x) => x.classList.toggle('on', x === b));
-  });
-});
-const LV_NAME = { 1: '一点点', 2: '有点气', 3: '很生气', 4: '超生气' };
-const LV_EMO = { 1: '🙂', 2: '😐', 3: '😠', 4: '🤯' };
+const MOODS = {
+  5: { e: '😆', n: '开心到冒泡', c: '#ff7fb0' },
+  4: { e: '😊', n: '挺开心的', c: '#ffa6c9' },
+  3: { e: '😐', n: '就那样', c: '#c9b6c3' },
+  2: { e: '🥺', n: '有点难过', c: '#9fb6d8' },
+  1: { e: '😢', n: '好伤心', c: '#7f97c9' }
+};
+let moodPick = 0;
 
-function renderAnger() {
-  const list = LS.get('jxy_anger', []);
-  $('angerCount').textContent = list.length ? list.length + ' 条' : '';
-  const box = $('angerList');
-  if (!list.length) { box.innerHTML = '<div class="muted">还没有记过咧姐姐~</div>'; return; }
-  box.innerHTML = '';
-  list.slice(0, 20).forEach((it) => {
-    const d = document.createElement('div');
-    d.className = 'item';
-    d.innerHTML = '<div class="h"><span class="t">' + LV_EMO[it.lv] + ' ' + LV_NAME[it.lv] + '</span>'
-      + '<span class="time">' + it.t + '</span></div>'
-      + '<div class="b"></div>'
-      + (it.want ? '<div class="need">要他做：</div>' : '');
-    d.querySelector('.b').textContent = it.text;
-    if (it.want) d.querySelector('.need').textContent = '要他做：' + it.want;
-    box.appendChild(d);
+function moodData() { return LS.get('jxy_mood', {}); }
+function moodSave(obj) { LS.set('jxy_mood', obj); }
+function moodKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function moodDateLabel(key, isToday) {
+  const [y, m, d] = key.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const wk = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][dt.getDay()];
+  const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(y, m - 1, d).setHours(0, 0, 0, 0)) / 86400000);
+  const pre = days === 0 ? '今天 · ' : days === 1 ? '昨天 · ' : days === 2 ? '前天 · ' : '';
+  return pre + (m) + '月' + d + '日 ' + wk;
+}
+
+function renderMood() {
+  const data = moodData();
+  const todayKey = moodKey(new Date());
+  const today = data[todayKey];
+  if (!moodPick && today) moodPick = today.lv;                 // 恢复今天已选的心情
+  document.querySelectorAll('#moods button').forEach((b) => {
+    b.classList.toggle('on', +b.dataset.lv === moodPick);
+  });
+  if (today && $('moodText').value === '') $('moodText').value = today.text || '';
+  $('moodDate').textContent = moodDateLabel(todayKey, true);
+  $('moodTip').textContent = today
+    ? '今天记过啦（' + MOODS[today.lv].e + ' ' + MOODS[today.lv].n + '），想改就再点「记下来」～'
+    : '';
+
+  // 最近 7 天（今天在最左边）
+  let strip = '';
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(start.getTime() - i * 86400000);
+    const k = moodKey(dt);
+    const rec = data[k];
+    const m = rec ? MOODS[rec.lv] : null;
+    strip += '<div class="mood-day' + (i === 0 ? ' today' : '') + '">'
+      + '<div class="d">' + (i === 0 ? '今天' : (dt.getMonth() + 1) + '/' + dt.getDate()) + '</div>'
+      + '<span class="e' + (m ? '' : ' empty') + '">' + (m ? m.e : '·') + '</span>'
+      + '<div class="b"><i style="width:' + (m ? '100' : '0') + '%;background:' + (m ? m.c : 'transparent') + '"></i></div>'
+      + '</div>';
+  }
+  $('moodStrip').innerHTML = strip;
+
+  // 统计（本月）
+  const now = new Date();
+  const mPrefix = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+  let good = 0, bad = 0, all = 0;
+  Object.keys(data).forEach((k) => {
+    if (k.indexOf(mPrefix) === 0) { all++; if (data[k].lv >= 4) good++; if (data[k].lv <= 2) bad++; }
+  });
+  $('moodStat').textContent = all ? '本月 ' + all + ' 天 · 开心 ' + good + ' 天' + (bad ? ' · 难过 ' + bad + ' 天' : '') : '还没有记录～';
+
+  // 日记列表
+  const keys = Object.keys(data).sort().reverse();
+  $('moodCount').textContent = keys.length ? keys.length + ' 天' : '';
+  const box = $('moodList');
+  if (!keys.length) { box.innerHTML = '<div class="muted">还没有记过咧姐姐~ 今天记第一条吧 ♡</div>'; return; }
+  box.innerHTML = keys.slice(0, 30).map((k) => {
+    const rec = data[k], m = MOODS[rec.lv] || MOODS[3];
+    return '<div class="item">'
+      + '<div class="h"><span class="t">' + m.e + ' ' + m.n + '</span>'
+      + '<span class="time">' + moodDateLabel(k, k === todayKey) + '</span></div>'
+      + (rec.text ? '<div class="b"></div>' : '<div class="muted" style="margin:0">（这天没写什么）</div>')
+      + '</div>';
+  }).join('');
+  // 文本要单独塞，避免 HTML 注入
+  box.querySelectorAll('.item').forEach((el, i) => {
+    const rec = data[keys[i]];
+    if (rec && rec.text && el.querySelector('.b')) el.querySelector('.b').textContent = rec.text;
   });
 }
-$('angerSend').addEventListener('click', async function () {
-  if (!angerLevel) { $('angerTip').textContent = '先选一下生气程度～'; return; }
-  const txt = $('angerText').value.trim();
-  if (!txt) { $('angerTip').textContent = '写一下因为什么事～'; return; }
-  const want = $('angerWant').value.trim();
-  const t = stamp();
-  const list = LS.get('jxy_anger', []);
-  list.unshift({ lv: angerLevel, text: txt, want: want, t: t });
-  LS.set('jxy_anger', list.slice(0, 100));
 
-  this.disabled = true; $('angerTip').textContent = '正在发送…';
-  const msg = '江鑫颖 写于 ' + t + '\n'
-    + '\n【生气程度】' + LV_EMO[angerLevel] + ' ' + LV_NAME[angerLevel] + '\n'
-    + '\n【因为什么事】\n' + txt + '\n'
-    + '\n【要他做什么才能消气】\n' + (want || '（她还没写，快去问她）') + '\n';
-  await pushToHim('江鑫颖生气了 ' + LV_EMO[angerLevel], msg, 5);   // 消气=最高优先级(最强震动)
+document.querySelectorAll('#moods button').forEach((b) => {
+  b.addEventListener('click', () => {
+    moodPick = +b.dataset.lv;
+    document.querySelectorAll('#moods button').forEach((x) => x.classList.toggle('on', x === b));
+    try { beep(720, 0.06); } catch (e) { }
+  });
+});
+
+$('moodSave').addEventListener('click', function () {
+  if (!moodPick) { $('moodTip').textContent = '先戳一个今天的心情嘛～'; return; }
+  const data = moodData();
+  const k = moodKey(new Date());
+  data[k] = { lv: moodPick, text: $('moodText').value.trim(), t: Date.now() };
+  moodSave(data);
+  renderMood();
+  $('moodTip').textContent = '记好啦～ 憨豆帮你收着 ♡';
+  try { beep(880, 0.1); } catch (e) { }
+  this.textContent = '记好啦 ✅';
+  setTimeout(() => { this.textContent = '记下来 ♡'; }, 1600);
+});
+
+$('moodSend').addEventListener('click', async function () {
+  if (!moodPick) { $('moodTip').textContent = '先戳一个今天的心情嘛～'; return; }
+  const text = $('moodText').value.trim() || '（她今天没写什么）';
+  const m = MOODS[moodPick];
+  const msg = '江鑫颖 写于 ' + stamp() + '\n'
+    + '\n【今天的心情】' + m.e + ' ' + m.n + '\n'
+    + '\n【她想说的】\n' + text + '\n';
+  this.disabled = true; $('moodTip').textContent = '正在发送…';
+  await pushToHim('江鑫颖今天的心情 ' + m.e, msg, moodPick <= 2 ? 5 : 4);
   this.disabled = false;
-  $('angerTip').textContent = '已发给他 ✅ 等他来找你';
-  $('angerText').value = ''; $('angerWant').value = '';
-  angerLevel = 0; document.querySelectorAll('#levels button').forEach((x) => x.classList.remove('on'));
-  renderAnger();
+  $('moodTip').textContent = '已发给他 ✅';
   this.textContent = '已发送 ✅';
-  setTimeout(() => { this.textContent = '发给他'; }, 1800);
+  setTimeout(() => { this.textContent = '让他知道'; }, 1800);
 });
 
 /* ============================================================
@@ -1229,7 +1309,7 @@ setInterval(() => { if (document.getElementById('view-pet').classList.contains('
    启动
    ============================================================ */
 setHearts(hearts);
-renderDays(); renderQuote(); renderCheckin(); renderAnger(); renderHeartBudget();
+renderDays(); renderQuote(); renderCheckin(); renderMood(); renderHeartBudget();
 petSay(randomPetLine()); renderPet();
 
 /* 若目录里放了 pet.png，就用它作为宠物形象（你自己提供的图片） */
@@ -1250,7 +1330,7 @@ setInterval(renderQuote, 60000);
 /* 打开时按 #tab 定位；支持 ?setup=1 填 token */
 (function init() {
   const h = (location.hash || '').replace('#', '');
-  if (['home', 'love', 'anger', 'pet'].includes(h)) showTab(h);
+  if (['home', 'love', 'mood', 'pet'].includes(h)) showTab(h);
   if (new URLSearchParams(location.search).get('setup') === '1') {
     const t = prompt('粘贴推送 token（PushPlus 的 token 或 Server酱 的 SCT 开头 SendKey）：', getToken());
     if (t !== null) {
