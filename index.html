@@ -501,7 +501,7 @@
       <textarea id="moodText" rows="4"></textarea>
 
       <div style="margin-top:12px"><button class="btn" id="moodSave">记下来 ♡</button></div>
-      <div style="margin-top:8px"><button class="btn ghost small" id="moodSend">让他知道</button></div>
+      <div style="margin-top:8px"><button class="btn ghost small" id="moodSend">再发一次给他</button></div>
       <div class="muted" id="moodTip"></div>
     </div>
 
@@ -1000,15 +1000,24 @@ $('calNext').addEventListener('click', () => {
   renderCal();
 });
 
-$('moodSave').addEventListener('click', function () {
+$('moodSave').addEventListener('click', async function () {
   if (!moodPick) { $('moodTip').textContent = '先戳一个今天的心情嘛～'; return; }
   const data = moodData();
   const k = moodKey(new Date());
-  data[k] = { lv: moodPick, text: $('moodText').value.trim(), t: Date.now() };
+  const text = $('moodText').value.trim();
+  data[k] = { lv: moodPick, text: text, t: Date.now() };
   moodSave(data);
   renderMood();
-  $('moodTip').textContent = '记好啦～ 憨豆帮你收着 ♡';
+  const m = MOODS[moodPick];
+  $('moodTip').textContent = '记好啦～ 正在告诉他…';
   try { beep(880, 0.1); } catch (e) { }
+  const msg = '江鑫颖 写于 ' + stamp() + '\n'
+    + '\n【今天的心情】' + m.e + ' ' + m.n + '\n'
+    + '\n【她想说的】\n' + (text || '（今天没写什么）') + '\n';
+  const r = await pushToHim('江鑫颖今天的心情 ' + m.e, msg, moodPick <= 2 ? 5 : 4);
+  $('moodTip').textContent = r
+    ? '记好啦～ 已经发给他了 ♡'
+    : '记好啦～（网络好像不太好，点「再发一次给他」重试）';
   this.textContent = '记好啦 ✅';
   setTimeout(() => { this.textContent = '记下来 ♡'; }, 1600);
 });
@@ -1025,7 +1034,7 @@ $('moodSend').addEventListener('click', async function () {
   this.disabled = false;
   $('moodTip').textContent = '已发给他 ✅';
   this.textContent = '已发送 ✅';
-  setTimeout(() => { this.textContent = '让他知道'; }, 1800);
+  setTimeout(() => { this.textContent = '再发一次给他'; }, 1800);
 });
 
 /* ============================================================
