@@ -1579,8 +1579,8 @@ function renderHourly(dayIdx) {
     if (firstRain < 0 && p >= 50) firstRain = parseInt(H.time[i].slice(11, 13), 10);
   });
   const sum = firstRain >= 0
-    ? '☔ ' + WX_TIME_CUTE(firstRain) + '前后可能会下雨，伞伞带上～'
-    : (maxP >= 30 ? '🌦️ 可能飘一点点雨，不下也没关系～' : '☀️ 一整天都亮亮的～');
+    ? '☔ ' + WX_TIME_CUTE(firstRain) + '前后可能下雨，记得带伞'
+    : (maxP >= 30 ? '🌦️ 可能有小雨，出门带把伞更稳妥' : '☀️ 一整天天气都不错');
   let html = '<div class="wx-hsum">' + sum + '</div><div class="wx-hrow">';
   idx.forEach((i) => {
     const p = H.precipitation_probability[i] || 0;
@@ -1596,27 +1596,27 @@ function renderHourly(dayIdx) {
   $('wxHourly').innerHTML = html;
 }
 
-/* 憨豆的天气台词：可爱、不啰嗦、不教训人 */
+/* 天气提示：正常说法，不堆叠词、不说教 */
 function wxCute(n, day) {
   const t = n.temp, c = n.code, rain = day.rain, uv = day.uv, hum = n.hum, wind = n.wind;
   const out = [];
-  if (c >= 95) out.push('外面在打鼓咚咚咚，雷公公好大声');
-  else if (rain >= 70) out.push('天上要倒水啦，伞伞一定要带上☔');
-  else if (rain >= 40) out.push('可能会飘点雨，伞伞塞进包里嘛');
-  else if (c === 0) out.push('太阳大大的，今天亮晶晶');
-  else if (c <= 2) out.push('云软软的，天很好看');
-  else if (c === 3) out.push('云把太阳藏起来啦，凉凉的');
-  else if (c >= 45 && c <= 48) out.push('外面白白的，像棉花糖糊住了天');
-  if (t >= 32) out.push('热乎乎的，短袖小裙子安排！');
-  else if (t >= 28) out.push('暖暖的，穿薄薄的就够啦');
-  else if (t >= 24) out.push('不冷不热，怎么穿都好看');
-  else if (t >= 20) out.push('有一点点凉，小外套刚刚好');
-  else if (t >= 15) out.push('凉凉的，要穿厚一点点哦');
-  else out.push('冷冷！裹成小团子再出门');
-  if (uv >= 7) out.push('太阳有点凶，小帽子戴上才不会变小黑炭～');
-  if (hum >= 90) out.push('黏黏的，喝多多水水才舒服');
-  if (wind >= 20) out.push('风呼呼的，头发要飞走啦');
-  return out.slice(0, 3).join('，').replace(/[～~]$/, '') + '～';
+  if (c >= 95) out.push('有雷阵雨，尽量先别出门');
+  else if (rain >= 70) out.push('会下雨，记得带伞☔');
+  else if (rain >= 40) out.push('可能会下雨，带把伞放包里');
+  else if (c === 0) out.push('天气晴朗');
+  else if (c <= 2) out.push('多云，天气不错');
+  else if (c === 3) out.push('阴天，比较凉快');
+  else if (c >= 45 && c <= 48) out.push('有雾，出门注意看路');
+  if (t >= 32) out.push('很热，穿短袖合适');
+  else if (t >= 28) out.push('比较暖和，穿薄一点就行');
+  else if (t >= 24) out.push('温度刚好，正常穿就行');
+  else if (t >= 20) out.push('有点凉，建议加件外套');
+  else if (t >= 15) out.push('比较凉，穿厚一点');
+  else out.push('很冷，穿暖和点再出门');
+  if (uv >= 7) out.push('紫外线偏强，注意防晒');
+  if (hum >= 90) out.push('湿度很高，记得多喝水');
+  if (wind >= 20) out.push('风比较大，出门注意');
+  return out.slice(0, 3).join('，') + '。';
 }
 
 function wxWeekName(i, dateStr) {
