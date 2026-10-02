@@ -115,6 +115,30 @@
   .mood-day .b i{display:block;height:100%;border-radius:3px}
   .mood-tag{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:9px;background:#fff0f7;color:#e2568c}
   .mood-day.today .d{color:#e2568c;font-weight:800}
+  /* 心情月历 */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 9px}
+  .cal-head button{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:#fff;
+    color:var(--pink-deep);font-size:17px;font-weight:900;cursor:pointer;font-family:inherit;line-height:1;
+  }
+  .cal-head button:active{transform:scale(.92)}
+  .cal-head button:disabled{opacity:.3}
+  .cal-title{font-size:13.5px;font-weight:800;color:var(--pink-deep)}
+  .cal-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:#b39aa6;margin-bottom:5px}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-day{
+    height:46px;border-radius:11px;background:#fffdfe;border:1.5px solid #f3e8ef;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;transition:transform .12s,background .15s,border-color .15s;
+  }
+  .cal-day:active{transform:scale(.93)}
+  .cal-day .n{font-size:11px;color:#a9bccb;line-height:1.1}
+  .cal-day .e{font-size:17px;line-height:1.25}
+  .cal-day.blank{background:transparent;border-color:transparent;cursor:default}
+  .cal-day.has{border-color:#ffd7e6;background:linear-gradient(135deg,#fffafd,#fff2f8)}
+  .cal-day.today{border-color:var(--pink);box-shadow:inset 0 0 0 2px #ffe4f0}
+  .cal-day.sel{background:linear-gradient(135deg,#ffe9f3,#ffd9ea);border-color:var(--pink-deep)}
+  .cal-detail{font-size:12.5px;color:var(--ink-soft);margin-top:10px;line-height:1.7;min-height:18px}
 
   /* ===== 列表项 ===== */
   .item{background:#fffdfe;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
@@ -484,6 +508,18 @@
     <div class="card">
       <div class="k"><span>最近 7 天</span><span id="moodStat"></span></div>
       <div class="mood-strip" id="moodStrip"></div>
+    </div>
+
+    <div class="card">
+      <div class="k"><span>心情月历</span><span id="calStat"></span></div>
+      <div class="cal-head">
+        <button id="calPrev">‹</button>
+        <span class="cal-title" id="calTitle"></span>
+        <button id="calNext">›</button>
+      </div>
+      <div class="cal-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-detail" id="calDetail"></div>
     </div>
 
     <div class="card">
@@ -894,6 +930,7 @@ function renderMood() {
     const rec = data[keys[i]];
     if (rec && rec.text && el.querySelector('.b')) el.querySelector('.b').textContent = rec.text;
   });
+  renderCal();                                   // 月历跟着一起刷新
 }
 
 document.querySelectorAll('#moods button').forEach((b) => {
@@ -902,6 +939,65 @@ document.querySelectorAll('#moods button').forEach((b) => {
     document.querySelectorAll('#moods button').forEach((x) => x.classList.toggle('on', x === b));
     try { beep(720, 0.06); } catch (e) { }
   });
+});
+
+/* ============================================================
+   心情月历
+   ============================================================ */
+let calRef = new Date();
+calRef.setDate(1); calRef.setHours(0, 0, 0, 0);
+let calSelKey = '';
+
+function showCalDetail(key) {
+  const rec = moodData()[key];
+  const label = moodDateLabel(key, false).replace(/^[^·]*·\s*/, '');
+  if (!rec) { $('calDetail').textContent = label + '：这天还没记呢～'; return; }
+  const mo = MOODS[rec.lv] || MOODS[3];
+  $('calDetail').textContent = label + '：' + mo.e + ' ' + mo.n + (rec.text ? ' · ' + rec.text : '');
+}
+
+function renderCal() {
+  const data = moodData();
+  const y = calRef.getFullYear(), m = calRef.getMonth();
+  const now = new Date();
+  $('calTitle').textContent = y + '年' + (m + 1) + '月';
+  $('calNext').disabled = (y > now.getFullYear()) || (y === now.getFullYear() && m >= now.getMonth());
+  const days = new Date(y, m + 1, 0).getDate();
+  const lead = new Date(y, m, 1).getDay();
+  let html = '', good = 0, bad = 0, cnt = 0;
+  for (let i = 0; i < lead; i++) html += '<div class="cal-day blank"></div>';
+  for (let d = 1; d <= days; d++) {
+    const key = y + '-' + pad(m + 1) + '-' + pad(d);
+    const rec = data[key];
+    const isToday = key === moodKey(now);
+    if (rec) { cnt++; if (rec.lv >= 4) good++; if (rec.lv <= 2) bad++; }
+    html += '<div class="cal-day' + (rec ? ' has' : '') + (isToday ? ' today' : '')
+      + (key === calSelKey ? ' sel' : '') + '" data-k="' + key + '">'
+      + '<span class="n">' + d + '</span>'
+      + '<span class="e">' + (rec ? (MOODS[rec.lv] || MOODS[3]).e : '') + '</span></div>';
+  }
+  $('calGrid').innerHTML = html;
+  $('calStat').textContent = cnt
+    ? '记录 ' + cnt + ' 天 · 开心 ' + good + ' 天' + (bad ? ' · 难过 ' + bad + ' 天' : '')
+    : '';
+  if (calSelKey) showCalDetail(calSelKey);
+}
+
+$('calGrid').addEventListener('click', (e) => {
+  const el = e.target.closest('.cal-day');
+  if (!el || !el.dataset.k) return;
+  calSelKey = el.dataset.k;
+  renderCal();
+  try { beep(700, 0.05); } catch (err) { }
+});
+$('calPrev').addEventListener('click', () => {
+  calRef = new Date(calRef.getFullYear(), calRef.getMonth() - 1, 1);
+  renderCal();
+});
+$('calNext').addEventListener('click', () => {
+  if ($('calNext').disabled) return;
+  calRef = new Date(calRef.getFullYear(), calRef.getMonth() + 1, 1);
+  renderCal();
 });
 
 $('moodSave').addEventListener('click', function () {
