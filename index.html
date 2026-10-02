@@ -314,7 +314,10 @@
   .wx-face{font-size:17px;line-height:1.5}
   .wx-week{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
   .wx-week::-webkit-scrollbar{height:0}
-  .wx-day{flex:0 0 auto;width:57px;text-align:center;background:#fffffff0;border:1.5px solid #dceaf7;border-radius:12px;padding:6px 2px}
+  .wx-day{flex:0 0 auto;width:57px;text-align:center;background:#fffffff0;border:1.5px solid #dceaf7;border-radius:12px;padding:6px 2px;cursor:pointer;transition:transform .12s,border-color .15s,background .15s}
+  .wx-day:active{transform:scale(.94)}
+  .wx-day.sel{border-color:#ff9ec4;background:linear-gradient(135deg,#fff0f7,#ffdcea);box-shadow:0 3px 10px rgba(255,140,180,.22)}
+  .wx-hint{font-size:11px;color:#a9bccb;margin-top:6px;text-align:center}
   .wx-day .d{font-size:11px;color:#8fa9bd}
   .wx-day .e{font-size:19px;line-height:1.5}
   .wx-day .t{font-size:10.5px;color:#5a7f9c;font-weight:700}
@@ -1279,7 +1282,7 @@ paintPin();
    ============================================================ */
 const WX_URL = 'https://api.open-meteo.com/v1/forecast?latitude=24.01&longitude=97.85'
   + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m'
-  + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max'
+  + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset'
   + '&timezone=Asia%2FShanghai&forecast_days=7';
 
 const WX_CODES = {
@@ -1323,35 +1326,62 @@ function wxWeekName(i, dateStr) {
   return ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()];
 }
 
-function renderWx(data) {
-  const cur = data.current;
-  const [emo, name] = wxInfo(cur.weather_code);
-  const now = {
-    temp: Math.round(cur.temperature_2m), code: cur.weather_code,
-    hum: Math.round(cur.relative_humidity_2m), wind: cur.wind_speed_10m,
-    feels: Math.round(cur.apparent_temperature)
-  };
+let wxData = null, wxSel = 0;
+
+function renderWx(data, dayIdx) {
+  wxData = data;
+  wxSel = dayIdx || 0;
+  const cur = data.current, D = data.daily;
+  const code = wxSel === 0 ? cur.weather_code : D.weather_code[wxSel];
+  const [emo, name] = wxInfo(code);
+  const tmax = Math.round(D.temperature_2m_max[wxSel]), tmin = Math.round(D.temperature_2m_min[wxSel]);
+  const rain = D.precipitation_probability_max ? D.precipitation_probability_max[wxSel] : null;
+  const uv = D.uv_index_max[wxSel];
+  const hhmm = (s) => (s ? s.slice(11, 16) : '');
+
   $('wxIcon').textContent = emo;
-  $('wxTemp').textContent = now.temp;
   $('wxDesc').textContent = name;
-  $('wxMeta').textContent = '体感 ' + now.feels + '° · 湿度 ' + now.hum + '% · 风 ' + Math.round(now.wind) + 'km/h';
-  $('wxSay').textContent = wxCute(now, {
-    rain: data.daily.precipitation_probability_max[0], uv: data.daily.uv_index_max[0]
-  });
-  const d = new Date();
-  $('wxDate').textContent = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  if (wxSel === 0) {
+    const t = Math.round(cur.temperature_2m), feels = Math.round(cur.apparent_temperature);
+    const hum = Math.round(cur.relative_humidity_2m), wind = cur.wind_speed_10m;
+    $('wxTemp').innerHTML = t + '<i>°</i>';
+    $('wxMeta').textContent = '体感 ' + feels + '° · 湿度 ' + hum + '% · 风 ' + Math.round(wind) + 'km/h'
+      + (rain !== null ? ' · 降雨 ' + rain + '%' : '');
+    $('wxSay').textContent = wxCute({ temp: t, code: code, hum: hum, wind: wind, feels: feels }, { rain: rain, uv: uv });
+  } else {
+    $('wxTemp').innerHTML = tmax + '<i>°</i>';
+    $('wxMeta').textContent = '最高 ' + tmax + '° / 最低 ' + tmin + '°'
+      + (rain !== null ? ' · 降雨 ' + rain + '%' : '')
+      + ' · 紫外线 ' + Math.round(uv)
+      + (D.sunrise && D.sunrise[wxSel] ? ' · 日出 ' + hhmm(D.sunrise[wxSel]) + ' 日落 ' + hhmm(D.sunset[wxSel]) : '');
+    $('wxSay').textContent = wxCute({ temp: tmax, code: code, hum: -1, wind: -1 }, { rain: rain, uv: uv });
+  }
+  const now = new Date();
+  $('wxDate').textContent = wxSel === 0
+    ? (now.getMonth() + 1) + '月' + now.getDate() + '日'
+    : D.time[wxSel].slice(5).replace('-', ' 月 ') + ' 日';
+
   let html = '';
-  for (let i = 0; i < data.daily.time.length; i++) {
-    const e = wxInfo(data.daily.weather_code[i])[0];
-    html += '<div class="wx-day' + (i === 0 ? ' today' : '') + '">'
-      + '<div class="d">' + wxWeekName(i, data.daily.time[i]) + '</div>'
+  for (let i = 0; i < D.time.length; i++) {
+    const e = wxInfo(D.weather_code[i])[0];
+    html += '<div class="wx-day' + (i === 0 ? ' today' : '') + (i === wxSel ? ' sel' : '') + '" data-i="' + i + '">'
+      + '<div class="d">' + wxWeekName(i, D.time[i]) + '</div>'
       + '<div class="e">' + e + '</div>'
-      + '<div class="t">' + Math.round(data.daily.temperature_2m_max[i]) + '° / '
-      + Math.round(data.daily.temperature_2m_min[i]) + '°</div></div>';
+      + '<div class="t">' + Math.round(D.temperature_2m_max[i]) + '° / '
+      + Math.round(D.temperature_2m_min[i]) + '°</div></div>';
   }
   $('wxWeek').innerHTML = html;
   $('wxCard').classList.remove('wx-busy');
 }
+
+/* 点某一天 → 看那天的详情；点卡片其他地方 → 重新获取最新天气 */
+$('wxWeek').addEventListener('click', (e) => {
+  const el = e.target.closest('.wx-day');
+  if (!el || !wxData) return;
+  e.stopPropagation();
+  renderWx(wxData, parseInt(el.dataset.i, 10));
+  try { beep(660, 0.06); } catch (err) { }
+});
 
 async function loadWx(force) {
   const cached = LS.get('jxy_wx', null);
