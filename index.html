@@ -300,8 +300,21 @@
   /* ===== 天气卡片（瑞丽 · 憨豆播报） ===== */
   .card.wx{background:linear-gradient(135deg,#eaf6ff,#fff2f9 55%,#ffeaf3);border:2px solid #cfe6fa}
   .wx-now{display:flex;align-items:center;gap:14px;padding:4px 2px 0}
-  .wx-icon{font-size:46px;line-height:1;filter:drop-shadow(0 4px 8px rgba(120,180,230,.28));animation:wxFloat 3.6s ease-in-out infinite}
+  .wx-icon{position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1;animation:wxFloat 3.6s ease-in-out infinite}
   @keyframes wxFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+  .wx-icon .wx-emo{position:relative;z-index:2}
+  .wx-icon .drop{position:absolute;top:0;width:2.5px;height:11px;border-radius:3px;background:linear-gradient(#bfe0f7,#5fa8de);z-index:1;animation:wxRain 1.15s linear infinite}
+  @keyframes wxRain{0%{transform:translateY(-2px);opacity:0}25%{opacity:.95}100%{transform:translateY(28px);opacity:0}}
+  .wx-icon .flake{position:absolute;top:0;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 3px #cfe6fa;z-index:1;animation:wxSnow 1.8s linear infinite}
+  @keyframes wxSnow{0%{transform:translateY(-2px) translateX(0);opacity:0}30%{opacity:1}100%{transform:translateY(26px) translateX(5px);opacity:0}}
+  .wx-icon .sun{position:absolute;inset:2px;border-radius:50%;z-index:0;animation:wxSun 2.8s ease-out infinite}
+  @keyframes wxSun{0%{box-shadow:0 0 0 0 rgba(255,193,84,.55)}100%{box-shadow:0 0 0 14px rgba(255,193,84,0)}}
+  .wx-icon .cloud{position:absolute;left:2px;right:2px;bottom:8px;height:16px;border-radius:50%;background:rgba(150,190,225,.35);filter:blur(4px);z-index:1;animation:wxCloud 3.4s ease-in-out infinite}
+  @keyframes wxCloud{0%,100%{transform:translateX(-4px);opacity:.5}50%{transform:translateX(6px);opacity:.85}}
+  .wx-icon .fog{position:absolute;left:0;right:0;height:5px;border-radius:4px;background:rgba(180,200,215,.5);filter:blur(2px);z-index:1;animation:wxFog 3s ease-in-out infinite}
+  @keyframes wxFog{0%,100%{transform:translateX(-6px);opacity:.35}50%{transform:translateX(8px);opacity:.75}}
+  .wx-icon .flash{position:absolute;inset:0;border-radius:50%;background:rgba(255,246,180,.5);z-index:1;animation:wxFlash 2.4s steps(1,end) infinite}
+  @keyframes wxFlash{0%,88%,100%{opacity:0}90%,93%{opacity:.85}}
   .wx-txt{flex:1;min-width:0}
   .wx-temp{font-size:34px;font-weight:900;color:#3d7fb8;line-height:1.05}
   .wx-temp i{font-size:17px;font-style:normal;font-weight:800;margin-left:1px}
@@ -318,6 +331,20 @@
   .wx-day:active{transform:scale(.94)}
   .wx-day.sel{border-color:#ff9ec4;background:linear-gradient(135deg,#fff0f7,#ffdcea);box-shadow:0 3px 10px rgba(255,140,180,.22)}
   .wx-hint{font-size:11px;color:#a9bccb;margin-top:6px;text-align:center}
+  /* 逐小时 */
+  .wx-hourly{margin-top:10px;background:#fffffff0;border:1.5px solid #e2eef8;border-radius:14px;padding:9px 8px 7px}
+  .wx-hsum{font-size:12.5px;color:#4f7f9e;font-weight:700;padding:0 2px 7px}
+  .wx-hrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px}
+  .wx-hrow::-webkit-scrollbar{height:0}
+  .wx-h{flex:0 0 auto;width:46px;text-align:center}
+  .wx-h .t{font-size:10.5px;color:#8fa9bd}
+  .wx-h .e{font-size:17px;line-height:1.45}
+  .wx-h .c{font-size:11.5px;font-weight:800;color:#4f7f9e}
+  .wx-h .bar{height:26px;display:flex;align-items:flex-end;justify-content:center;margin-top:2px}
+  .wx-h .bar i{display:block;width:7px;border-radius:3px 3px 0 0;background:linear-gradient(#bfe0f7,#7fb6e8);min-height:2px}
+  .wx-h .p{font-size:9.5px;color:#9fb6c8;margin-top:1px}
+  .wx-h.wet .c{color:#2f7fbf}
+  .wx-h.wet .p{color:#4f9fd0;font-weight:700}
   .wx-day .d{font-size:11px;color:#8fa9bd}
   .wx-day .e{font-size:19px;line-height:1.5}
   .wx-day .t{font-size:10.5px;color:#5a7f9c;font-weight:700}
@@ -369,6 +396,8 @@
       </div>
       <div class="wx-say"><span class="wx-face">🐰</span><span id="wxSay">…</span></div>
       <div class="wx-week" id="wxWeek"></div>
+      <div class="wx-hint" id="wxHint"></div>
+      <div class="wx-hourly" id="wxHourly" style="display:none"></div>
     </div>
 
     <div class="card">
@@ -1283,7 +1312,9 @@ paintPin();
 const WX_URL = 'https://api.open-meteo.com/v1/forecast?latitude=24.01&longitude=97.85'
   + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m'
   + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset'
+  + '&hourly=temperature_2m,weather_code,precipitation_probability'
   + '&timezone=Asia%2FShanghai&forecast_days=7';
+const WX_CACHE_KEY = 'jxy_wx2';        // 换 key 让旧的缓存（没有每小时数据）失效
 
 const WX_CODES = {
   0: ['☀️', '大晴天'], 1: ['🌤️', '太阳露脸'], 2: ['⛅', '云在飘'], 3: ['☁️', '阴阴的'],
@@ -1295,6 +1326,90 @@ const WX_CODES = {
 };
 const wxInfo = (c) => WX_CODES[c] || ['🌤️', '还不错'];
 const wxFresh = (c) => c && c.t && (Date.now() - c.t < 30 * 60 * 1000);   // 缓存 30 分钟
+
+/* 天气码 → 动画类型 */
+function wxKind(c) {
+  if (c >= 95) return 'storm';
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return 'snow';
+  if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82)) return 'rain';
+  if (c === 45 || c === 48) return 'fog';
+  if (c <= 1) return 'sun';
+  return 'cloud';
+}
+
+/* 会动的天气图标：下雨就落雨点、出太阳就发光晕、起雾就飘雾带 */
+function setWxIcon(emo, code) {
+  const el = $('wxIcon');
+  const kind = wxKind(code);
+  let inner = '<span class="wx-emo">' + emo + '</span>';
+  if (kind === 'rain' || kind === 'storm') {
+    for (let i = 0; i < 5; i++) {
+      inner += '<i class="drop" style="left:' + (14 + i * 17) + '%;animation-delay:' + (i * 0.19).toFixed(2) + 's"></i>';
+    }
+    if (kind === 'storm') inner += '<i class="flash"></i>';
+  } else if (kind === 'snow') {
+    for (let i = 0; i < 5; i++) {
+      inner += '<i class="flake" style="left:' + (14 + i * 17) + '%;animation-delay:' + (i * 0.32).toFixed(2) + 's"></i>';
+    }
+  } else if (kind === 'sun') {
+    inner += '<i class="sun"></i>';
+  } else if (kind === 'fog') {
+    for (let i = 0; i < 3; i++) {
+      inner += '<i class="fog" style="top:' + (24 + i * 18) + '%;animation-delay:' + (i * 0.6).toFixed(2) + 's"></i>';
+    }
+  } else {
+    inner += '<i class="cloud"></i>';
+  }
+  el.innerHTML = inner;
+}
+
+/* 把小时数变成可爱说法：13 → 下午 1 点 */
+const WX_TIME_CUTE = (h) => {
+  if (h === 0) return '半夜 12 点';
+  if (h < 6) return '凌晨 ' + h + ' 点';
+  if (h < 9) return '早上 ' + h + ' 点';
+  if (h < 12) return '上午 ' + h + ' 点';
+  if (h === 12) return '中午 12 点';
+  if (h < 18) return '下午 ' + (h - 12) + ' 点';
+  if (h < 20) return '傍晚 ' + (h - 12) + ' 点';
+  return '晚上 ' + (h - 12) + ' 点';
+};
+
+/* 逐小时：一条可横滑的小时条 + “几点可能下雨”的可爱提示 */
+function renderHourly(dayIdx) {
+  const H = wxData && wxData.hourly;
+  if (!H) { $('wxHourly').innerHTML = '<div class="wx-hsum">每小时的数据还在路上…</div>'; return; }
+  const date = wxData.daily.time[dayIdx];
+  const idx = [];
+  for (let i = 0; i < H.time.length; i++) {
+    if (H.time[i].slice(0, 10) === date) {
+      const hh = parseInt(H.time[i].slice(11, 13), 10);
+      if (hh >= 6 && hh <= 23) idx.push(i);
+    }
+  }
+  let firstRain = -1, maxP = 0;
+  idx.forEach((i) => {
+    const p = H.precipitation_probability[i] || 0;
+    if (p > maxP) maxP = p;
+    if (firstRain < 0 && p >= 50) firstRain = parseInt(H.time[i].slice(11, 13), 10);
+  });
+  const sum = firstRain >= 0
+    ? '☔ ' + WX_TIME_CUTE(firstRain) + '前后可能会下雨，伞伞带上～'
+    : (maxP >= 30 ? '🌦️ 可能飘一点点雨，不下也没关系～' : '☀️ 一整天都亮亮的～');
+  let html = '<div class="wx-hsum">' + sum + '</div><div class="wx-hrow">';
+  idx.forEach((i) => {
+    const p = H.precipitation_probability[i] || 0;
+    const [e] = wxInfo(H.weather_code[i]);
+    html += '<div class="wx-h' + (p >= 50 ? ' wet' : '') + '">'
+      + '<div class="t">' + H.time[i].slice(11, 13) + '时</div>'
+      + '<div class="e">' + e + '</div>'
+      + '<div class="c">' + Math.round(H.temperature_2m[i]) + '°</div>'
+      + '<div class="bar"><i style="height:' + Math.max(2, Math.round(p * 0.26)) + 'px"></i></div>'
+      + '<div class="p">' + (p >= 10 ? p + '%' : '') + '</div></div>';
+  });
+  html += '</div>';
+  $('wxHourly').innerHTML = html;
+}
 
 /* 憨豆的天气台词：可爱、不啰嗦、不教训人 */
 function wxCute(n, day) {
@@ -1339,7 +1454,7 @@ function renderWx(data, dayIdx) {
   const uv = D.uv_index_max[wxSel];
   const hhmm = (s) => (s ? s.slice(11, 16) : '');
 
-  $('wxIcon').textContent = emo;
+  setWxIcon(emo, code);                                  // 换图标 + 对应的小动画
   $('wxDesc').textContent = name;
   if (wxSel === 0) {
     const t = Math.round(cur.temperature_2m), feels = Math.round(cur.apparent_temperature);
@@ -1371,20 +1486,33 @@ function renderWx(data, dayIdx) {
       + Math.round(D.temperature_2m_min[i]) + '°</div></div>';
   }
   $('wxWeek').innerHTML = html;
+  $('wxHourly').style.display = 'none';                  // 换天先收起逐小时
+  $('wxHint').textContent = '戳小格子看别的天，再戳一下看每小时的天气～';
   $('wxCard').classList.remove('wx-busy');
 }
 
-/* 点某一天 → 看那天的详情；点卡片其他地方 → 重新获取最新天气 */
+/* 点某一天 → 看那天的详情；再点同一天 → 展开/收起逐小时；点卡片其他地方 → 刷新天气 */
 $('wxWeek').addEventListener('click', (e) => {
   const el = e.target.closest('.wx-day');
   if (!el || !wxData) return;
   e.stopPropagation();
-  renderWx(wxData, parseInt(el.dataset.i, 10));
+  const i = parseInt(el.dataset.i, 10);
+  const box = $('wxHourly');
+  if (i === wxSel && box.innerHTML) {                    // 再戳一下 → 展开/收起
+    const open = box.style.display !== 'none';
+    box.style.display = open ? 'none' : 'block';
+    $('wxHint').textContent = open ? '再戳一下看每小时的天气～' : '再戳一下收起来';
+    try { beep(open ? 520 : 760, 0.06); } catch (err) { }
+    return;
+  }
+  renderWx(wxData, i);
+  renderHourly(i);
+  $('wxHint').textContent = '再戳一下这个格子，看每小时的天气～';
   try { beep(660, 0.06); } catch (err) { }
 });
 
 async function loadWx(force) {
-  const cached = LS.get('jxy_wx', null);
+  const cached = LS.get(WX_CACHE_KEY, null);
   if (!force && cached && wxFresh(cached)) { renderWx(cached.data); return; }
   if (cached && cached.data) renderWx(cached.data);        // 先用旧数据顶上，不空白
   $('wxCard').classList.add('wx-busy');
@@ -1393,14 +1521,15 @@ async function loadWx(force) {
   try {
     const r = await fetch(WX_URL, { signal: ac.signal, cache: 'no-store' });
     const j = await r.json();
-    LS.set('jxy_wx', { t: Date.now(), data: j });
+    LS.set(WX_CACHE_KEY, { t: Date.now(), data: j });
     renderWx(j);
   } catch (e) {
     if (!cached || !cached.data) {
-      $('wxIcon').textContent = '🫧';
+      $('wxIcon').innerHTML = '<span class="wx-emo">🫧</span>';
       $('wxDesc').textContent = '天气小精灵跑丢了';
       $('wxMeta').textContent = '';
       $('wxSay').textContent = '等一会儿再戳我一下，我再问问它～';
+      $('wxHint').textContent = '';
     }
     $('wxCard').classList.remove('wx-busy');
   } finally {
